@@ -33,7 +33,7 @@ public:
 		std::cout << "소멸자 호출 종료, count : " << callCountDestructor << std::endl;
 	}
 
-	myclass(const myclass& other)
+	/*myclass(const myclass& other)
 	{
 		std::cout << "복사 생성자 호출" << std::endl;
 
@@ -42,7 +42,7 @@ public:
 		++callCountCopyConstructor;
 
 		std::cout << "복사 생성자 호출 종료, count : " << callCountCopyConstructor << std::endl;
-	}
+	}*/
 
 private:
 	int* ptr;
@@ -80,7 +80,7 @@ int main()
 
 	//func();
 
-	UVector<myclass> vec = {};
+	std::vector<myclass> vec = {};
 
 	// vec.reserve(1);
 
