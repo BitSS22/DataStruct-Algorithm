@@ -122,7 +122,7 @@ void func()
 
 	printf_s("value = %s, size = %d, capacity = %d\n", "not found data", myvec.size(), myvec.capacity());
 
-	myvec.reserve(3);
+	//myvec.reserve(3);
 
 	for (size_t i = 0; i < 100; i++)
 	{

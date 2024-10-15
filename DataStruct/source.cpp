@@ -33,7 +33,7 @@ public:
 		std::cout << "소멸자 호출 종료, count : " << callCountDestructor << std::endl;
 	}
 
-	/*myclass(const myclass& other)
+	myclass(const myclass& other)
 	{
 		std::cout << "복사 생성자 호출" << std::endl;
 
@@ -42,7 +42,14 @@ public:
 		++callCountCopyConstructor;
 
 		std::cout << "복사 생성자 호출 종료, count : " << callCountCopyConstructor << std::endl;
-	}*/
+	}
+
+	myclass& operator=(const myclass& other)
+	{
+		ptr = other.ptr;
+
+		return *this;
+	}
 
 private:
 	int* ptr;
@@ -80,15 +87,23 @@ int main()
 
 	//func();
 
-	std::vector<myclass> vec = {};
+	UVector<myclass*> vec = {};
+	
+	vec.reserve(1);
+	vec.reserve(2);
+	vec.reserve(3);
+	vec.reserve(4);
+	vec.reserve(5);
+	vec.reserve(6);
+	vec.reserve(7);
 
-	// vec.reserve(1);
 
-	for (size_t i = 0; i < 10; ++i)
+	for (size_t i = 0; i < 100; ++i)
 	{
 		std::cout << "i : " << i << " (for문 실행 시작)" << std::endl;
-		vec.push_back(myclass());
-		printf_s("i : %d, vec.size : %d, vec.capacity : %d \n", i, vec.size(), vec.capacity());
+		myclass* ptr = new myclass();
+		vec.push_back(ptr);
+		printf_s("i : %d, vec.size : %d, vec.capacity : %d \n\n", i, vec.size(), vec.capacity());
 	}
 
 	std::cout << "main 함수 종료" << std::endl;

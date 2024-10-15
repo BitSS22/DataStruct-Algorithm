@@ -73,6 +73,12 @@ public:
 			reserve(value);
 		}
 
+		//if (SizeValue + 1 > CapacityValue)
+		//{
+		//	// 정확한지는 모르겠습니다.
+		//	reserve(CapacityValue + 1);
+		//}
+
 		// 내부 에러가 안납니다.
 		// 그래서 만들때는 Typedef DataType으로 만들는걸선호합니다.
 		// _Data->B;
