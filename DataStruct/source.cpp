@@ -3,6 +3,7 @@
 #include <crtdbg.h>
 #include "myvec.h"
 #include <iostream>
+#include <malloc.h>
 
 class myclass
 {
@@ -50,6 +51,7 @@ int main()
 
 	vec.reserve(10);
 
+	myclass* ptr = reinterpret_cast<myclass*>(malloc(sizeof(myclass)*10));
 	std::cout << vec.size() << std::endl << vec.capacity() << std::endl;
 
 	return 0;
