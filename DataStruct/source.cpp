@@ -87,22 +87,21 @@ int main()
 
 	//func();
 
-	UVector<myclass*> vec = {};
+	std::vector<myclass> vec = {};
 	
-	vec.reserve(1);
-	vec.reserve(2);
-	vec.reserve(3);
-	vec.reserve(4);
-	vec.reserve(5);
-	vec.reserve(6);
-	vec.reserve(7);
+	// vec.reserve(1);
+	// vec.reserve(2);
+	// vec.reserve(3);
+	// vec.reserve(4);
+	// vec.reserve(5);
+	// vec.reserve(6);
+	// vec.reserve(7);
 
 
 	for (size_t i = 0; i < 100; ++i)
 	{
 		std::cout << "i : " << i << " (for문 실행 시작)" << std::endl;
-		myclass* ptr = new myclass();
-		vec.push_back(ptr);
+		vec.push_back(myclass());
 		printf_s("i : %d, vec.size : %d, vec.capacity : %d \n\n", i, vec.size(), vec.capacity());
 	}
 
