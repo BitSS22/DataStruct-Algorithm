@@ -18,6 +18,9 @@
     <ClInclude Include="vector.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
+    <ClInclude Include="myvec.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source.cpp">
