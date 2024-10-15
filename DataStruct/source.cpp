@@ -45,7 +45,8 @@ private:
 
 int main()
 {
-	UVector<myclass> vec = {};
+	// UVector<myclass> vec = {};
+	std::vector<myclass> vec = {};
 
 	vec.reserve(10);
 
