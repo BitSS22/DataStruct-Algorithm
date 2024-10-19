@@ -127,7 +127,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="myvec.h" />
+    <ClInclude Include="list.h" />
+    <ClInclude Include="myclass.h" />
     <ClInclude Include="vector.h" />
   </ItemGroup>
   <ItemGroup>

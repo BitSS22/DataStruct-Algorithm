@@ -1,134 +1,95 @@
 #pragma once
 #include <assert.h>
-#include <vector>
 
-//typedef float T;
+// typedef float T;
 template <typename T>
 class MyVector
 {
 public:
 	MyVector()
-		: data(nullptr)
-		, count(0)
-		, max_count(0)
+		: DataPtr(nullptr)
+		, DataCount(0)
+		, MaxCount(0)
 	{
 	}
 	~MyVector()
 	{
-		if (data != nullptr)
+		if (DataPtr != nullptr)
 		{
-			delete[] data;
-			data = nullptr;
+			delete[] DataPtr;
+			DataPtr = nullptr;
 		}
 	}
 
 private:
-	T* data;
-	size_t count;
-	size_t max_count;
+	T* DataPtr;
+	size_t DataCount;
+	size_t MaxCount;
 
 public:
 	T& at(size_t _index) const
 	{
-		if (_index >= count)
+		if (_index >= MaxCount)
 			assert(nullptr);
 
-		return data[_index];
+		return DataPtr[_index];
 	}
 	size_t capacity() const
 	{
-		return max_count;
+		return MaxCount;
 	}
 	size_t size() const
 	{
-		return count;
+		return DataCount;
 	}
 	void clear()
 	{
-		count = 0;
+		DataCount = 0;
 	}
 
 	void push_back(const T& _data)
 	{
-		if (count >= max_count)
+		if (DataCount >= MaxCount)
 		{
-			size_t value = max_count * 2 <= 0 ? 1 : max_count * 2;
-			reserve(value);
+			if (MaxCount < 4)
+				reserve(MaxCount + 1);
+			else
+				reserve(static_cast<size_t>(MaxCount * 1.5));
 		}
 
-		data[count] = _data;
-		++count;
+		DataPtr[DataCount] = _data;
+		++DataCount;
 	}
 
 	void reserve(size_t _capacity)
 	{
-		if (_capacity <= max_count)
+		if (MaxCount >= _capacity)
 			return;
 
-		T* tempvector = data;
-		data = new T[_capacity];
-
-		for (size_t i = 0; i < count; ++i)
-			data[i] = tempvector[i];
-
-		if (tempvector != nullptr)
+		if (MaxCount == 0)
 		{
-			delete[] tempvector;
-			tempvector = nullptr;
+			DataPtr = new T[_capacity];
 		}
-		max_count = _capacity;
+		else
+		{
+			T* PrevDataPtr = DataPtr;
+			DataPtr = new T[_capacity];
 
-#ifdef _DEBUG
-		printf_s("데이터 재 할당\n");
-#endif // DEBUG
+			for (size_t i = 0; i < DataCount; ++i)
+				DataPtr[i] = PrevDataPtr[i];
+
+			delete[] PrevDataPtr;
+		}
+
+		MaxCount = _capacity;
 	}
 
 	T& operator[] (size_t _index) const
 	{
-		return data[_index];
-	}
-
-};
-
-class myclass
-{
-public:
-	myclass()
-		: ptr(nullptr)
-	{
-		ptr = new int;
-	}
-	~myclass()
-	{
-		if (ptr != nullptr)
-		{
-			delete ptr;
-			ptr = nullptr;
-		}
+		return DataPtr[_index];
 	}
 
 private:
-	int* ptr;
+
 };
-void func()
-{
-	std::vector<float> vec = {};
 
-	auto temp = vec.capacity();
-	vec.reserve(1);
-	vec.resize(1);
-
-	MyVector<myclass> myvec = {};
-
-	printf_s("value = %s, size = %d, capacity = %d\n", "not found data", myvec.size(), myvec.capacity());
-
-	//myvec.reserve(3);
-
-	for (size_t i = 0; i < 100; i++)
-	{
-		myvec.push_back(myclass());
-		printf_s("value = %f, size = %d, capacity = %d\n", (myvec[i]), myvec.size(), myvec.capacity());
-	}
-	
-	return;
-}
