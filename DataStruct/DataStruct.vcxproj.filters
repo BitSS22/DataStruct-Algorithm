@@ -4,6 +4,7 @@
     <ClInclude Include="vector.h" />
     <ClInclude Include="myclass.h" />
     <ClInclude Include="list.h" />
+    <ClInclude Include="map.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source.cpp" />

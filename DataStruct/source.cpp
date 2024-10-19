@@ -3,7 +3,7 @@
 #include <map>
 #include "vector.h"
 #include "list.h"
-// #include "map.h"
+#include "map.h"
 #include "myclass.h"
 
 #include <crtdbg.h>
@@ -24,13 +24,11 @@ int main()
 {
 	_CrtSetDbgFlag(_CRTDBG_LEAK_CHECK_DF | _CRTDBG_ALLOC_MEM_DF);
 
-	vector<int> vec = {};
-	auto temp = vec.begin();
-	list<int> li = {};
+	// TestFunc();
 
-	VectorTestfunc();
-	ListTestfunc();
-	// MapTestfunc();
+	// VectorTestfunc();
+	// ListTestfunc();
+	MapTestfunc();
 
 	return 0;
 }
@@ -107,5 +105,10 @@ void ListTestfunc()
 
 	cout << "ListTestfunc Á¾·á" << endl;
 
+	return;
+}
+
+void MapTestfunc()
+{
 	return;
 }
