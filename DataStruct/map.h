@@ -2,9 +2,9 @@
 
 #define INNER_CLASS
 
-using T1 = int;
-using T2 = int;
-//template<typename T1, typename T2>
+// using T1 = int;
+// using T2 = int;
+template<typename T1, typename T2>
 class MyMap
 {
 public:
@@ -86,7 +86,6 @@ public:
 	}
 	Iterator erase(Iterator _iter)
 	{
-		// TODO. 원소를 삭제하는 코드
 		if (_iter == end())
 			assert(nullptr);
 
@@ -96,7 +95,6 @@ public:
 
 		if (_iter.Indicate->LeftChild == nullptr && _iter.Indicate->RightChild == nullptr)
 		{
-			// 자식이 없는 경우
 			if (ParentNode == nullptr)
 				RootNode = nullptr;
 			else if (ParentNode->LeftChild == _iter.Indicate)
@@ -109,15 +107,13 @@ public:
 		}
 		else if (_iter.Indicate->LeftChild != nullptr && _iter.Indicate->RightChild != nullptr)
 		{
-			// TODO. 자식이 둘인 경우의 코드 작성
 			Iterator CurIterator = _iter++;
 			CurIterator.Indicate->Data = _iter.Indicate->Data;
 
-			ReturnIterator = erase(_iter);
+			erase(_iter);
 		}
 		else
 		{
-			// 자식이 하나인 경우
 			MyNode* ConnectNode = nullptr;
 			
 			if (_iter.Indicate->LeftChild != nullptr)
@@ -127,7 +123,7 @@ public:
 				if (ParentNode == nullptr)
 					RootNode = ConnectNode;
 				else
-					ParentNode->LeftChild = ConnectNode;
+					ParentNode->RightChild = ConnectNode;
 			}
 			else
 			{
@@ -136,7 +132,7 @@ public:
 				if (ParentNode == nullptr)
 					RootNode = ConnectNode;
 				else
-					ParentNode->RightChild = ConnectNode;
+					ParentNode->LeftChild = ConnectNode;
 			}
 
 			ConnectNode->Parent = ParentNode;
@@ -144,7 +140,7 @@ public:
 			--DataCount;
 		}
 
-		return ReturnIterator; // TODO. 리턴 값 확인
+		return ReturnIterator;
 	}
 	void clear()
 	{

@@ -110,31 +110,31 @@ void ListTestfunc()
 
 void MapTestfunc()
 {
-	MyMap m = {};
+	MyMap<myclass, float> m = {};
 
 	bool insertTest = true;
 
-	insertTest = m.insert(MyMap::MyPair(8, 0));
-	insertTest = m.insert(MyMap::MyPair(12, 0));
-	insertTest = m.insert(MyMap::MyPair(4, 0));
-	insertTest = m.insert(MyMap::MyPair(6, 0));
-	insertTest = m.insert(MyMap::MyPair(2, 0));
-	insertTest = m.insert(MyMap::MyPair(10, 0));
-	insertTest = m.insert(MyMap::MyPair(14, 0));
-	insertTest = m.insert(MyMap::MyPair(3, 0));
-	insertTest = m.insert(MyMap::MyPair(1, 0));
-	insertTest = m.insert(MyMap::MyPair(5, 0));
-	insertTest = m.insert(MyMap::MyPair(7, 0));
-	insertTest = m.insert(MyMap::MyPair(13, 0));
-	insertTest = m.insert(MyMap::MyPair(11, 0));
-	insertTest = m.insert(MyMap::MyPair(9, 0));
-	insertTest = m.insert(MyMap::MyPair(15, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(8, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(12, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(4, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(6, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(2, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(10, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(14, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(3, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(1, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(5, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(7, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(13, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(11, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(9, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(15, 0));
 
-	insertTest = m.insert(MyMap::MyPair(2, 0));
-	insertTest = m.insert(MyMap::MyPair(3, 0));
-	insertTest = m.insert(MyMap::MyPair(7, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(2, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(3, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(7, 0));
 
-	MyMap::Iterator iter = {&m, nullptr};
+	MyMap<myclass, float>::Iterator iter = {&m, nullptr};
 
 	iter = m.find(4);
 	iter = m.find(1);
@@ -143,35 +143,32 @@ void MapTestfunc()
 	iter = m.find(0);
 
 	for (iter = m.begin(); iter != m.end(); ++iter)
-		cout << iter->first << endl;
+		cout << iter->first.GetValue() << endl;
 
 	m.clear();
 
-	insertTest = m.insert(MyMap::MyPair(8, 0));
-	insertTest = m.insert(MyMap::MyPair(12, 0));
-	insertTest = m.insert(MyMap::MyPair(4, 0));
-	insertTest = m.insert(MyMap::MyPair(6, 0));
-	insertTest = m.insert(MyMap::MyPair(2, 0));
-	insertTest = m.insert(MyMap::MyPair(10, 0));
-	insertTest = m.insert(MyMap::MyPair(14, 0));
-	insertTest = m.insert(MyMap::MyPair(3, 0));
-	insertTest = m.insert(MyMap::MyPair(1, 0));
-	insertTest = m.insert(MyMap::MyPair(5, 0));
-	insertTest = m.insert(MyMap::MyPair(7, 0));
-	insertTest = m.insert(MyMap::MyPair(13, 0));
-	insertTest = m.insert(MyMap::MyPair(11, 0));
-	insertTest = m.insert(MyMap::MyPair(9, 0));
-	insertTest = m.insert(MyMap::MyPair(15, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(8, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(12, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(4, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(6, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(2, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(10, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(14, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(3, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(1, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(5, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(7, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(13, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(11, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(9, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(15, 0));
 
-	insertTest = m.insert(MyMap::MyPair(2, 0));
-	insertTest = m.insert(MyMap::MyPair(3, 0));
-	insertTest = m.insert(MyMap::MyPair(7, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(2, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(3, 0));
+	insertTest = m.insert(MyMap<myclass, float>::MyPair(7, 0));
 
-	iter = m.find(1);
-	iter = m.erase(iter);
-
-	iter = m.find(2);
-	iter = m.erase(iter);
+	for (iter = m.begin(); iter != m.end();)
+		iter = m.erase(iter);
 
 	return;
 }

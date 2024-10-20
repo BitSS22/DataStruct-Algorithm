@@ -18,7 +18,7 @@ public:
 	{
 		std::cout << "생성자 호출" << std::endl;
 
-		ptr = new int;
+		ptr = new int(_value);
 	}
 	~myclass()
 	{
@@ -78,6 +78,14 @@ public:
 		}
 
 		return *this;
+	}
+	bool operator<(const myclass& _other)
+	{
+		return *ptr < *(_other.ptr);
+	}
+	bool operator==(const myclass& _other)
+	{
+		return *ptr == *(_other.ptr);
 	}
 
 	int GetValue()
