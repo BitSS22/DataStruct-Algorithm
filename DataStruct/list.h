@@ -183,7 +183,8 @@ private:
 		MyNode(T _data)
 			: Data(_data)
 			, PrevNode(nullptr)
-			, NextNode(nullptr) {}
+			, NextNode(nullptr)
+		{}
 
 	private:
 		T Data;
