@@ -110,5 +110,29 @@ void ListTestfunc()
 
 void MapTestfunc()
 {
+	MyMap m = {};
+
+	bool insertTest = true;
+
+	insertTest = m.insert(MyMap::MyPair(4, 0));
+	insertTest = m.insert(MyMap::MyPair(2, 0));
+	insertTest = m.insert(MyMap::MyPair(6, 0));
+	insertTest = m.insert(MyMap::MyPair(1, 0));
+	insertTest = m.insert(MyMap::MyPair(3, 0));
+	insertTest = m.insert(MyMap::MyPair(5, 0));
+	insertTest = m.insert(MyMap::MyPair(7, 0));
+
+	insertTest = m.insert(MyMap::MyPair(2, 0));
+	insertTest = m.insert(MyMap::MyPair(3, 0));
+	insertTest = m.insert(MyMap::MyPair(7, 0));
+
+	MyMap::Iterator iter = {&m, nullptr};
+
+	iter = m.find(4);
+	iter = m.find(1);
+	iter = m.find(2);
+	iter = m.find(5);
+	iter = m.find(0);
+
 	return;
 }
