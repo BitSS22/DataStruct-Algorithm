@@ -114,13 +114,21 @@ void MapTestfunc()
 
 	bool insertTest = true;
 
+	insertTest = m.insert(MyMap::MyPair(8, 0));
+	insertTest = m.insert(MyMap::MyPair(12, 0));
 	insertTest = m.insert(MyMap::MyPair(4, 0));
-	insertTest = m.insert(MyMap::MyPair(2, 0));
 	insertTest = m.insert(MyMap::MyPair(6, 0));
-	insertTest = m.insert(MyMap::MyPair(1, 0));
+	insertTest = m.insert(MyMap::MyPair(2, 0));
+	insertTest = m.insert(MyMap::MyPair(10, 0));
+	insertTest = m.insert(MyMap::MyPair(14, 0));
 	insertTest = m.insert(MyMap::MyPair(3, 0));
+	insertTest = m.insert(MyMap::MyPair(1, 0));
 	insertTest = m.insert(MyMap::MyPair(5, 0));
 	insertTest = m.insert(MyMap::MyPair(7, 0));
+	insertTest = m.insert(MyMap::MyPair(13, 0));
+	insertTest = m.insert(MyMap::MyPair(11, 0));
+	insertTest = m.insert(MyMap::MyPair(9, 0));
+	insertTest = m.insert(MyMap::MyPair(15, 0));
 
 	insertTest = m.insert(MyMap::MyPair(2, 0));
 	insertTest = m.insert(MyMap::MyPair(3, 0));
@@ -133,6 +141,33 @@ void MapTestfunc()
 	iter = m.find(2);
 	iter = m.find(5);
 	iter = m.find(0);
+
+	for (iter = m.begin(); iter != m.end(); ++iter)
+	{
+		cout << iter->first << endl;
+	}
+
+	m.clear();
+
+	insertTest = m.insert(MyMap::MyPair(8, 0));
+	insertTest = m.insert(MyMap::MyPair(12, 0));
+	insertTest = m.insert(MyMap::MyPair(4, 0));
+	insertTest = m.insert(MyMap::MyPair(6, 0));
+	insertTest = m.insert(MyMap::MyPair(2, 0));
+	insertTest = m.insert(MyMap::MyPair(10, 0));
+	insertTest = m.insert(MyMap::MyPair(14, 0));
+	insertTest = m.insert(MyMap::MyPair(3, 0));
+	insertTest = m.insert(MyMap::MyPair(1, 0));
+	insertTest = m.insert(MyMap::MyPair(5, 0));
+	insertTest = m.insert(MyMap::MyPair(7, 0));
+	insertTest = m.insert(MyMap::MyPair(13, 0));
+	insertTest = m.insert(MyMap::MyPair(11, 0));
+	insertTest = m.insert(MyMap::MyPair(9, 0));
+	insertTest = m.insert(MyMap::MyPair(15, 0));
+
+	insertTest = m.insert(MyMap::MyPair(2, 0));
+	insertTest = m.insert(MyMap::MyPair(3, 0));
+	insertTest = m.insert(MyMap::MyPair(7, 0));
 
 	return;
 }

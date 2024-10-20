@@ -43,14 +43,15 @@ public:
 	}
 	bool insert(MyPair _newData)
 	{
-		// TODO. 원소를 삽입하는 코드
 		MyNode* CurIndicateNode = RootNode;
 
 		if (CurIndicateNode == nullptr)
+		{
 			RootNode = new MyNode(_newData);
+		}
 		else
 		{
-			MyNode* PrevIndicateNode = CurIndicateNode;
+			MyNode* PrevIndicateNode = nullptr;
 			bool IsLeft = true;
 
 			while (CurIndicateNode != nullptr)
@@ -82,28 +83,62 @@ public:
 
 		++DataCount;
 		return true;
-
-		// 1. 데이터가 하나도 없을때 (RootNode가 nullptr일 때)
-		// 1-1. 새로운 노드를 생성하고 RootNode를 새로운 노드로 설정
-		//
-		// 2. 데이터가 1개 이상 존재할 때
-		// 2-1. 현재 삽입한 노드의 key와 기존 노드의 key 값이 동일한 노드가 존재 할 때 -> 노드를 만들지 않고 false return
-		// 2-2. 현재 삽입한 노드의 key값이 기존 노드의 key 값보다 작을 때 -> LeftChild로 이동 후 반복
-		// 2-3. 현재 삽입한 노드의 key값이 기존 노드의 key 값보다 클 때 -> RightChild로 이동 후 반복
-		// 2-4. 이동한 노드가 nullptr일때 -> CreateNode의 Parent를 이전 노드로 설정, 이전 노드의 LeftChild 혹은 RightChild의 값을 CreateNode로 설정
 	}
 	Iterator erase(Iterator _iter)
 	{
 		// TODO. 원소를 삭제하는 코드
+		--DataCount;
 	}
 	void clear()
 	{
-		// TODO. 모든 원소를 삭제하는 코드
+		if (RootNode == nullptr)
+			return;
+
+		MyNode* CurIndicateNode = RootNode;
+
+		while (true)
+		{
+			if (CurIndicateNode->LeftChild != nullptr)
+			{
+				CurIndicateNode = CurIndicateNode->LeftChild;
+			}
+			else if (CurIndicateNode->RightChild != nullptr)
+			{
+				CurIndicateNode = CurIndicateNode->RightChild;
+			}
+			else
+			{
+				if (CurIndicateNode == RootNode)
+				{
+					RootNode = nullptr;
+					delete CurIndicateNode;
+					break;
+				}
+
+				MyNode* PrevIndicateNode = CurIndicateNode;
+				CurIndicateNode = CurIndicateNode->Parent;
+
+				if (CurIndicateNode->LeftChild == PrevIndicateNode)
+					CurIndicateNode->LeftChild = nullptr;
+				else
+					CurIndicateNode->RightChild = nullptr;
+
+				delete PrevIndicateNode;
+			}
+		}
+
+		DataCount = 0;
 	}
 	Iterator begin()
 	{
-		return Iterator(this, nullptr);
-		// TODO. 첫번째 원소를 리턴하는 이터레이터 작성
+		MyNode* CurIndicateNode = RootNode;
+		if (RootNode == nullptr)
+			return end();
+		else
+			while (CurIndicateNode->LeftChild != nullptr)
+				CurIndicateNode = CurIndicateNode->LeftChild;
+
+		return Iterator(this, CurIndicateNode);
 	}
 	Iterator end()
 	{
@@ -152,7 +187,40 @@ public:
 		}
 		Iterator& operator++()
 		{
-			// TODO.
+			if (*this == Owner->end())
+				assert(nullptr);
+
+			if (Indicate->RightChild != nullptr)
+			{
+				Indicate = Indicate->RightChild;
+
+				while (Indicate->LeftChild != nullptr)
+					Indicate = Indicate->LeftChild;
+			}
+			else
+			{
+				MyNode* PrevIndicate = nullptr;
+
+				while(true)
+				{
+					PrevIndicate = Indicate;
+
+					if (Indicate->Parent == nullptr)
+					{
+						*this = Owner->end();
+						break;
+					}
+					else
+					{
+						Indicate = Indicate->Parent;
+
+						if (PrevIndicate == Indicate->LeftChild)
+							break;
+					}
+				}
+			}
+			
+			return *this;
 		}
 		Iterator operator++(int)
 		{
@@ -162,7 +230,7 @@ public:
 		}
 		Iterator& operator--()
 		{
-			// TODO.
+			// TODO. 이전 원소를 가리키는 코드
 		}
 		Iterator operator--(int)
 		{
