@@ -87,7 +87,64 @@ public:
 	Iterator erase(Iterator _iter)
 	{
 		// TODO. 원소를 삭제하는 코드
-		--DataCount;
+		if (_iter == end())
+			assert(nullptr);
+
+		Iterator ReturnIterator = _iter;
+		++ReturnIterator;
+		MyNode* ParentNode = _iter.Indicate->Parent;
+
+		if (_iter.Indicate->LeftChild == nullptr && _iter.Indicate->RightChild == nullptr)
+		{
+			// 자식이 없는 경우
+			if (ParentNode == nullptr)
+				RootNode = nullptr;
+			else if (ParentNode->LeftChild == _iter.Indicate)
+				ParentNode->LeftChild = nullptr;
+			else
+				ParentNode->RightChild = nullptr;
+
+			delete _iter.Indicate;
+			--DataCount;
+		}
+		else if (_iter.Indicate->LeftChild != nullptr && _iter.Indicate->RightChild != nullptr)
+		{
+			// TODO. 자식이 둘인 경우의 코드 작성
+			Iterator CurIterator = _iter++;
+			CurIterator.Indicate->Data = _iter.Indicate->Data;
+
+			ReturnIterator = erase(_iter);
+		}
+		else
+		{
+			// 자식이 하나인 경우
+			MyNode* ConnectNode = nullptr;
+			
+			if (_iter.Indicate->LeftChild != nullptr)
+			{
+				ConnectNode = _iter.Indicate->LeftChild;
+
+				if (ParentNode == nullptr)
+					RootNode = ConnectNode;
+				else
+					ParentNode->LeftChild = ConnectNode;
+			}
+			else
+			{
+				ConnectNode = _iter.Indicate->RightChild;
+
+				if (ParentNode == nullptr)
+					RootNode = ConnectNode;
+				else
+					ParentNode->RightChild = ConnectNode;
+			}
+
+			ConnectNode->Parent = ParentNode;
+			delete _iter.Indicate;
+			--DataCount;
+		}
+
+		return ReturnIterator; // TODO. 리턴 값 확인
 	}
 	void clear()
 	{
@@ -150,6 +207,8 @@ public:
 	INNER_CLASS
 	class Iterator
 	{
+	public:
+		friend class MyMap;
 	public:
 		Iterator(MyMap* _map, MyNode* _node)
 			: Owner(_map)

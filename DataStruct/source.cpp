@@ -143,9 +143,7 @@ void MapTestfunc()
 	iter = m.find(0);
 
 	for (iter = m.begin(); iter != m.end(); ++iter)
-	{
 		cout << iter->first << endl;
-	}
 
 	m.clear();
 
@@ -168,6 +166,12 @@ void MapTestfunc()
 	insertTest = m.insert(MyMap::MyPair(2, 0));
 	insertTest = m.insert(MyMap::MyPair(3, 0));
 	insertTest = m.insert(MyMap::MyPair(7, 0));
+
+	iter = m.find(1);
+	iter = m.erase(iter);
+
+	iter = m.find(2);
+	iter = m.erase(iter);
 
 	return;
 }
