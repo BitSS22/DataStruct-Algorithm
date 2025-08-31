@@ -1,12 +1,44 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClInclude Include="vector.h" />
     <ClInclude Include="myclass.h" />
-    <ClInclude Include="list.h" />
-    <ClInclude Include="map.h" />
+    <ClInclude Include="list.h">
+      <Filter>DataStruct</Filter>
+    </ClInclude>
+    <ClInclude Include="vector.h">
+      <Filter>DataStruct</Filter>
+    </ClInclude>
+    <ClInclude Include="map.h">
+      <Filter>DataStruct</Filter>
+    </ClInclude>
+    <ClInclude Include="Sort.h">
+      <Filter>Algorithm\Sort</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility.h">
+      <Filter>Algorithm\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Shuffle.h">
+      <Filter>Algorithm\Shuffle</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source.cpp" />
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="DataStruct">
+      <UniqueIdentifier>{13436bca-22bd-4d0f-bd30-e499ef202d81}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Algorithm">
+      <UniqueIdentifier>{b13ccd46-5e47-4357-930d-4a81520033f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Algorithm\Sort">
+      <UniqueIdentifier>{fd254542-de6e-4dc9-bb86-64aa249395bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Algorithm\Shuffle">
+      <UniqueIdentifier>{581ef537-80b2-4b14-9b17-ab85d47a1204}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Algorithm\Utility">
+      <UniqueIdentifier>{1c52cf54-28b5-4c28-b2c0-e03297ad0eec}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>
