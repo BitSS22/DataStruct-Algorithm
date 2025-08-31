@@ -7,8 +7,8 @@ std::random_device rd;
 std::mt19937 gen(rd());
 
 // Knuth Shuffle
-template<typename Type>
-void ArrShuffle(Type _Arr[], size_t _Size)
+template<typename Type, size_t _Size>
+void ArrShuffle(Type (&Arr)[_Size])
 {
 	if (_Size < 2)
 		return;

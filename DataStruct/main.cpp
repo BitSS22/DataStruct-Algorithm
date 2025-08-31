@@ -64,7 +64,7 @@ void SortTest()
 		}
 
 		// Shuffle
-		ArrShuffle(Arr, ARRSIZE);
+		ArrShuffle(Arr);
 
 		// Input
 		std::cout << "Shuffle Arr" << std::endl;

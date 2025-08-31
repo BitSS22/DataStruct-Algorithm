@@ -102,11 +102,30 @@ namespace Sort
 		SelectionSort(_Arr, Utility::DefaultCompare<Type>);
 	}
 #pragma endregion
+#pragma region Merge
+	void MergeSort(Type _Arr[], size_t Size, Compare _Comp)
+	{
+		// assert(Size == 0 || _Comp == nullptr)
+		assert(Size || _Comp);
+
+		// 같은 사이즈의 배열을 하나 만든다.
+		Type* NewArr = reinterpret_cast<Type*>(malloc(sizeof(Type) * Size));
+
+		// nullptr Check
+		if (!NewArr)
+			return;
+
+		while (true)
+		{
+
+		}
+
+		// 할당한 메모리 해제
+		free(NewArr);
+	}
+#pragma endregion
 #pragma region Shell
 	void ShellSort(Type _Arr[], size_t Size);
-#pragma endregion
-#pragma region Merge
-	void MergeSort(Type _Arr[], size_t Size);
 #pragma endregion
 #pragma region Heap
 	void HeapSort(Type _Arr[], size_t Size);
