@@ -30,19 +30,26 @@
 // Timer
 #include <chrono>
 
+void SortTest();
+
 int main()
 {
 	// Memory Leak Check
 	_CrtSetDbgFlag(_CRTDBG_LEAK_CHECK_DF | _CRTDBG_ALLOC_MEM_DF);
 
+	SortTest();
+}
+
+void SortTest()
+{
 	// Arr Option
-	constexpr size_t ARRSIZE = 1000;
+	constexpr size_t ARRSIZE = 200;
 	constexpr size_t CarriageReturnCount = 20;
-	constexpr int Digit = GetDigit<ARRSIZE>();
+	constexpr int Digit = Utility::GetDigit<ARRSIZE>();
 
 	// Escape to InputKey == ESC
 	int InputKey = 0;
-	int EscapeKey = 27;
+	constexpr int EscapeKey = 27;
 
 	// GetTimes
 	std::vector<double> Elapseds = {};
@@ -53,7 +60,7 @@ int main()
 		int Arr[ARRSIZE] = {};
 		for (size_t i = 0; i < ARRSIZE; ++i)
 		{
-			Arr[i] = i;
+			Arr[i] = static_cast<int>(i);
 		}
 
 		// Shuffle
@@ -73,13 +80,13 @@ int main()
 
 		// Time Start
 		auto Start = std::chrono::steady_clock::now();
-		
+
 		// Sorting
-		Sort::BubbleSort(Arr, ARRSIZE);
+		Sort::BubbleSort(Arr);
 
 		// Time End
 		auto End = std::chrono::steady_clock::now();
-		
+
 		// Output
 		std::cout << "Sort Arr" << std::endl;
 		for (size_t i = 0; i < ARRSIZE; ++i)
