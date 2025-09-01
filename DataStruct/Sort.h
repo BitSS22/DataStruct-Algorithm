@@ -46,24 +46,16 @@ namespace Sort
 		// 첫번째 원소는 정렬 된 것으로 취급
 		for (size_t i = 1; i < _Size; ++i)
 		{
-			size_t CurIndex = i;
+			size_t Iter = i;
+			Type Inst = std::move(_Arr[Iter]);
 
-			// 현재 인덱스에서 0번 인덱스까지 순차적으로 값 비교
-			while (CurIndex > 0)
+			while (_Comp(Inst, _Arr[Iter - 1]) && Iter > 0)
 			{
-				// 현재 인덱스와 이전 인덱스의 대소 비교. true라면 둘을 바꾼다.
-				// 바뀐 자리의 이전 인덱스와 계속 비교.
-				if (_Comp(_Arr[CurIndex], _Arr[CurIndex - 1]))
-				{
-					Utility::Swap(_Arr[CurIndex], _Arr[CurIndex - 1]);
-					--CurIndex;
-				}
-				else
-				{
-					// false라면 자기 자리를 찾았으므로 break
-					break;
-				}
+				_Arr[Iter] = _Arr[Iter - 1];
+				--Iter;
 			}
+
+			_Arr[Iter] = std::move(Inst);
 		}
 	}
 	template <typename Type>
@@ -119,7 +111,7 @@ namespace Sort
 		// 기존 Arr, NewArr, Comp를 저장해 함수 인자 갯수를 줄일 것이다.
 		// 배열 내의 객체를 이동, 복사를 최소화 하기 위해 index 기반으로 정렬 한다.
 		// 당연히 데이터 영역에 하나만 있으므로, 쓰레드 언세이프 할 것이다.
-		inline static Type* Arr = nullptr;
+		inline static Type* Arr = nullptr; // 만약 변수를 같이 쓰고 싶다면 void*로 관리하고, 캐스팅 함수를 제공하는 것도 좋은 방법이 될수도.
 		inline static size_t* Index = nullptr;
 		inline static size_t* Buffer = nullptr;
 		inline static Compare* CompPtr = nullptr;
@@ -263,7 +255,33 @@ namespace Sort
 
 #pragma endregion
 #pragma region Shell
-	void ShellSort(Type _Arr[], size_t Size);
+	// Insert 함수에서 긁어왔다.
+	// ShellSort는 결국 InsertSort의 반복.
+	void ShellSort(Type _Arr[], size_t _Size, Compare _Comp = Utility::DefaultCompare<Type>) noexcept
+	{
+		// 초기 Gap은 절반. Gap == 1 은 InsertSort. Gap을 절반씩 나눈다.
+		for (size_t Gap = _Size / 2; Gap > 0; Gap /= 2)
+		{
+			for (size_t i = Gap; i < _Size; ++i)
+			{
+				size_t CurIndex = i;
+
+				while (CurIndex > Gap)
+				{
+					if (_Comp(_Arr[CurIndex], _Arr[CurIndex - Gap]))
+					{
+						Utility::Swap(_Arr[CurIndex], _Arr[CurIndex - Gap]);
+						CurIndex -= Gap;
+					}
+					else
+					{
+						break;
+					}
+				}
+			}
+		}
+		
+	}
 #pragma endregion
 #pragma region Heap
 	void HeapSort(Type _Arr[], size_t Size);
