@@ -122,7 +122,7 @@ namespace Sort
 		inline static Type* Arr = nullptr;
 		inline static size_t* Index = nullptr;
 		inline static size_t* Buffer = nullptr;
-		inline static Compare Comp = nullptr;
+		inline static Compare* CompPtr = nullptr;
 
 		// 실제 병합, 분할을 하는 함수
 		// 배열 크기를 추론하기 힘드니 시작 인덱스와 사이즈를 직접 받겠다.
@@ -158,7 +158,7 @@ namespace Sort
 				const Type& Right = Arr[Index[RightStart + RightIter]];
 
 				// Comp 함수가 true / false에 따라.
-				if (Comp(Right, Left))
+				if ((*CompPtr)(Right, Left))
 				{
 					Buffer[WriteIndex] = Index[RightStart + RightIter];
 					++RightIter;
@@ -217,7 +217,7 @@ namespace Sort
 
 		// MergeClass 변수 값을 설정해준다.
 		MergeClass<Type, Compare>::Arr = _Arr;
-		MergeClass<Type, Compare>::Comp = _Comp;
+		MergeClass<Type, Compare>::CompPtr = &_Comp;
 
 		// 실제 정렬은 여기서 수행.
 		MergeClass<Type, Compare>::Merge(0, Size);
@@ -247,7 +247,7 @@ namespace Sort
 		MergeClass<Type, Compare>::Arr = nullptr;
 		MergeClass<Type, Compare>::Index = nullptr;
 		MergeClass<Type, Compare>::Buffer = nullptr;
-		MergeClass<Type, Compare>::Comp = nullptr;
+		MergeClass<Type, Compare>::CompPtr = nullptr;
 	}
 	template <typename Type, size_t Size>
 	void MergeSort(Type(&_Arr)[Size]) noexcept
