@@ -3,8 +3,11 @@
 #include <assert.h>
 #include "Utility.h"
 
+#ifdef _DEBUG
 typedef bool(*Compare)(const int&, const int&);
 typedef int Type;
+#endif
+
 
 namespace Sort
 {

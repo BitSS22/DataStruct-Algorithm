@@ -20,9 +20,15 @@
     <ClInclude Include="Shuffle.h">
       <Filter>Algorithm\Shuffle</Filter>
     </ClInclude>
+    <ClInclude Include="Heap.h">
+      <Filter>Algorithm\Heap</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Heap.cpp">
+      <Filter>Algorithm\Heap</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="DataStruct">
@@ -39,6 +45,9 @@
     </Filter>
     <Filter Include="Algorithm\Utility">
       <UniqueIdentifier>{1c52cf54-28b5-4c28-b2c0-e03297ad0eec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Algorithm\Heap">
+      <UniqueIdentifier>{e56ecb15-87ab-4844-b46f-aa360e9d8f5c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -32,4 +32,36 @@ namespace Utility
 
 		return Count;
 	}
+
+	size_t GetDigit(size_t _Value) noexcept
+	{
+		assert(_Value != 0);
+
+		size_t Count = 0;
+
+		size_t v = _Value;
+		while (v > 0)
+		{
+			v /= 10;
+			++Count;
+		}
+
+		return Count;
+	}
+
+	int GetDigit(int _Value) noexcept
+	{
+		assert(_Value != 0);
+
+		int Count = 0;
+
+		int v = _Value;
+		while (v > 0)
+		{
+			v /= 10;
+			++Count;
+		}
+
+		return Count;
+	}
 }
