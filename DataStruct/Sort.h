@@ -1,6 +1,7 @@
 #pragma once
-#include "Utility.h"
+
 #include <assert.h>
+#include "Utility.h"
 
 typedef bool(*Compare)(const int&, const int&);
 typedef int Type;
@@ -8,11 +9,11 @@ typedef int Type;
 namespace Sort
 {
 #pragma region Sort Info
-// Agument로 배열, 정렬 규칙 함수를 받는다.
-// 배열의 길이는 템플릿 타입 추론으로 구한다.
-// 함수 템플릿 오버로드로 기본 함수는 DefaultCompare(내림차순)를 사용한다.
-// (람다, 펑터, 함수 포인터 등을 전부 받을 수 있도록 템플릿 오버로드)
-// 함수 포인터가 nullptr이면 assert.
+	// 매개 변수로 배열, 정렬 규칙 함수를 받는다.
+	// 배열의 길이는 템플릿 타입 추론으로 구한다.
+	// 함수 템플릿 오버로드로 기본 함수는 DefaultCompare(내림차순)를 사용한다.
+	// (람다, 펑터, 함수 포인터 등을 전부 받을 수 있도록 템플릿 오버로드)
+	// 함수 포인터가 nullptr이면 assert.
 
 #pragma endregion
 #pragma region Bubble
@@ -43,7 +44,7 @@ namespace Sort
 #pragma endregion
 #pragma region Insert
 	template <typename Type, size_t Size, typename Compare>
-	void InsertSort(Type (&_Arr)[Size], Compare _Comp) noexcept
+	void InsertSort(Type(&_Arr)[Size], Compare _Comp) noexcept
 	{
 		assert(_Comp);
 
@@ -78,7 +79,7 @@ namespace Sort
 #pragma endregion
 #pragma region Selection
 	template <typename Type, size_t Size, typename Compare>
-	void SelectionSort(Type (&_Arr)[Size], Compare _Comp) noexcept
+	void SelectionSort(Type(&_Arr)[Size], Compare _Comp) noexcept
 	{
 		assert(_Comp);
 
@@ -103,26 +104,76 @@ namespace Sort
 	}
 #pragma endregion
 #pragma region Merge
-	void MergeSort(Type _Arr[], size_t Size, Compare _Comp)
+	void MergeSort(Type _Arr[], size_t Size, Compare _Comp) noexcept
 	{
-		// assert(Size == 0 || _Comp == nullptr)
-		assert(Size || _Comp);
+		assert(Size);
+		assert(_Comp);
 
-		// 같은 사이즈의 배열을 하나 만든다.
-		Type* NewArr = reinterpret_cast<Type*>(malloc(sizeof(Type) * Size));
-
-		// nullptr Check
-		if (!NewArr)
+		// 같은 사이즈의 배열을 하나 만들었다.
+		// 큰 것 하나 만들어서 같이 쓴다.
+		MergeClass::NewArr = reinterpret_cast<Type*>(malloc(sizeof(Type) * Size));
+		// malloc failed, nullptr return.
+		if (nullptr == MergeClass::NewArr)
 			return;
 
-		while (true)
+		// class 변수 값을 설정해준다.
+		MergeClass::Arr = _Arr;
+		MergeClass::Comp = _Comp;
+
+		// 실제 정렬은 여기서 수행.
+		MergeClass::Merge(0, Size);
+
+		// 할당한 메모리 해제.
+		// 만약 정렬을 자주 사용한다면 해제는 프로세스 종료시 마지막에 한번만 하는 것도 고려해봄직 하다.
+		// (기존의 메모리 크기를 기억해두고, 모자라면 재할당하고, 충분하다면 재사용.)
+		free(MergeClass::NewArr);
+
+		// 머문 자리도 아름답게.
+		MergeClass::Arr = nullptr;
+		MergeClass::NewArr = nullptr;
+		MergeClass::Comp = nullptr;
+	}
+
+	static class MergeClass
+	{
+	public:
+		// 생성자를 delete해 객체를 만들 수 없게 하고,
+		// Function friend와 private로 다른 함수에서 호출할 수 없게 만든다.
+		MergeClass() = delete;
+		friend void MergeSort(Type _Arr[], size_t Size, Compare _Comp) noexcept;
+
+	private:
+		// 정렬을 수행할 메모리를 저장할 포인터.
+		// 기존 Arr, NewArr, Comp를 저장해 함수 인자 갯수를 줄일 것이다.
+		// 당연히 데이터 영역에 하나만 있으므로, 쓰레드 언세이프 할 것이다.
+		inline static Type* Arr = nullptr;
+		inline static Type* NewArr = nullptr;
+		inline static Compare Comp = nullptr;
+
+		// 실제 병합, 분할을 하는 함수
+		// 배열 크기를 추론하기 힘드니 시작 인덱스와 사이즈를 직접 받겠다.
+		static void Merge(size_t _StartIndex, size_t _Size) noexcept
 		{
+			// 배열 길이를 반으로 자른다. 분할정복 알고리즘.
+			// 코드 가독성을 위해 변수를 많이 선언하겠다.
+			size_t LeftStart = _StartIndex;
+			size_t LeftSize = _Size / 2;
+			size_t RightStart = LeftStart + LeftSize;
+			size_t RightSize = _Size - LeftSize;
+
+			// 배열 길이가 1이 될 때 까지 계속 나눈다.
+			if (LeftSize > 1)
+				Merge(LeftStart, LeftSize);
+
+			if (RightSize > 1)
+				Merge(RightStart, RightSize);
+
+			// 여기부터는 최초로 올 때 나눈 배열 길이가 각각 1일 것.
+			// 이제부터 병합을 시작한다.
+
 
 		}
-
-		// 할당한 메모리 해제
-		free(NewArr);
-	}
+	};
 #pragma endregion
 #pragma region Shell
 	void ShellSort(Type _Arr[], size_t Size);
