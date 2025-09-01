@@ -104,43 +104,15 @@ namespace Sort
 	}
 #pragma endregion
 #pragma region Merge
-	void MergeSort(Type _Arr[], size_t Size, Compare _Comp) noexcept
-	{
-		assert(Size);
-		assert(_Comp);
-
-		// 같은 사이즈의 배열을 하나 만들었다.
-		// 큰 것 하나 만들어서 같이 쓴다.
-		MergeClass::NewArr = reinterpret_cast<Type*>(malloc(sizeof(Type) * Size));
-		// malloc failed, nullptr return.
-		if (nullptr == MergeClass::NewArr)
-			return;
-
-		// class 변수 값을 설정해준다.
-		MergeClass::Arr = _Arr;
-		MergeClass::Comp = _Comp;
-
-		// 실제 정렬은 여기서 수행.
-		MergeClass::Merge(0, Size);
-
-		// 할당한 메모리 해제.
-		// 만약 정렬을 자주 사용한다면 해제는 프로세스 종료시 마지막에 한번만 하는 것도 고려해봄직 하다.
-		// (기존의 메모리 크기를 기억해두고, 모자라면 재할당하고, 충분하다면 재사용.)
-		free(MergeClass::NewArr);
-
-		// 머문 자리도 아름답게.
-		MergeClass::Arr = nullptr;
-		MergeClass::NewArr = nullptr;
-		MergeClass::Comp = nullptr;
-	}
-
-	static class MergeClass
+	template <typename Type, typename Compare>
+	class MergeClass
 	{
 	public:
 		// 생성자를 delete해 객체를 만들 수 없게 하고,
 		// Function friend와 private로 다른 함수에서 호출할 수 없게 만든다.
 		MergeClass() = delete;
-		friend void MergeSort(Type _Arr[], size_t Size, Compare _Comp) noexcept;
+		template <typename T, size_t i, typename Cmp>
+		friend void MergeSort(T(&_Arr)[i], Cmp _Comp) noexcept;
 
 	private:
 		// 정렬을 수행할 메모리를 저장할 포인터.
@@ -171,9 +143,93 @@ namespace Sort
 			// 여기부터는 최초로 올 때 나눈 배열 길이가 각각 1일 것.
 			// 이제부터 병합을 시작한다.
 
+			// 각각 배열의 인덱스를 따로 카운트 한다.
+			size_t LeftIter = 0;
+			size_t RightIter = 0;
+			// 실제 기록 될 위치
+			size_t WriteIndex = LeftStart;
 
+			// 두 배열의 원소가 둘 다 남아있는가?
+			while (LeftIter < LeftSize && RightIter < RightSize)
+			{
+				// Comp 함수가 true / false에 따라.
+				if (Comp(Arr[RightStart + RightIter], Arr[LeftStart + LeftIter]))
+				{
+					NewArr[WriteIndex] = Arr[RightStart + RightIter];
+					++RightIter;
+				}
+				else
+				{
+					NewArr[WriteIndex] = Arr[LeftStart + LeftIter];
+					++LeftIter;
+				}
+
+				// 들어갔으니 다음 복사 될 위치는 다음 인덱스로
+				++WriteIndex;
+			}
+
+			// 위 반복문이 끝나면 한쪽 배열에만 원소가 남아 있을 것.
+			// 나머지 남은 요소들을 채워넣는다.
+			// Left
+			while (LeftIter < LeftSize)
+			{
+				NewArr[WriteIndex] = Arr[LeftStart + LeftIter];
+				++WriteIndex;
+				++LeftIter;
+			}
+			// Right
+			while (RightIter < RightSize)
+			{
+				NewArr[WriteIndex] = Arr[RightStart + RightIter];
+				++WriteIndex;
+				++RightIter;
+			}
+
+			// 정렬 된 NewArr를 _Arr로 복사한다.
+			// 그냥 for문 쓰겠다.
+			for (size_t i = _StartIndex; i < _StartIndex + _Size; ++i)
+			{
+				Arr[i] = std::move(MergeClass<Type, Compare>::NewArr[i]);
+			}
 		}
 	};
+
+	template <typename Type, size_t Size, typename Compare>
+	void MergeSort(Type (&_Arr)[Size], Compare _Comp) noexcept
+	{
+		assert(Size);
+		assert(_Comp);
+
+		// 같은 사이즈의 배열을 하나 만들었다.
+		// 큰 것 하나 만들어서 같이 쓴다.
+		MergeClass<Type, Compare>::NewArr = reinterpret_cast<Type*>(malloc(sizeof(Type) * Size));
+		// malloc failed, nullptr return.
+		if (nullptr == MergeClass<Type, Compare>::NewArr)
+			return;
+
+		// MergeClass 변수 값을 설정해준다.
+		MergeClass<Type, Compare>::Arr = _Arr;
+		MergeClass<Type, Compare>::Comp = _Comp;
+
+		// 실제 정렬은 여기서 수행.
+		MergeClass<Type, Compare>::Merge(0, Size);
+
+		// 할당한 메모리 해제.
+		// 만약 정렬을 자주 사용한다면 해제는 프로세스 종료시 마지막에 한번만 하는 것도 고려해봄직 하다.
+		// (기존의 메모리 크기를 기억해두고, 모자라면 재할당하고, 충분하다면 재사용.)
+		free(MergeClass<Type, Compare>::NewArr);
+
+		// 머문 자리도 아름답게.
+		MergeClass<Type, Compare>::Arr = nullptr;
+		MergeClass<Type, Compare>::NewArr = nullptr;
+		MergeClass<Type, Compare>::Comp = nullptr;
+	}
+	template <typename Type, size_t Size>
+	void MergeSort(Type(&_Arr)[Size]) noexcept
+	{
+		MergeSort(_Arr, Utility::DefaultCompare<Type>);
+	}
+
 #pragma endregion
 #pragma region Shell
 	void ShellSort(Type _Arr[], size_t Size);

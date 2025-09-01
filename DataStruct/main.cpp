@@ -67,6 +67,8 @@ void SortTest()
 		ArrShuffle(Arr);
 
 		// Input
+		std::cout << "Case : " << Elapseds.size() + 1 << std::endl;
+
 		std::cout << "Shuffle Arr" << std::endl;
 		for (size_t i = 0; i < ARRSIZE; ++i)
 		{
@@ -82,7 +84,7 @@ void SortTest()
 		auto Start = std::chrono::steady_clock::now();
 
 		// Sorting
-		Sort::SelectionSort(Arr);
+		Sort::MergeSort(Arr);
 		//Sort::SelectionSort(Arr, [](const int& _Left, const int& _Right) -> bool { return _Left > _Right; });
 
 		// Time End
