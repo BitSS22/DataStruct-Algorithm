@@ -43,8 +43,8 @@ int main()
 void SortTest()
 {
 	// Arr Option
-	constexpr size_t ARRSIZE = 600;
-	constexpr size_t CarriageReturnCount = 40;
+	constexpr size_t ARRSIZE = 30;
+	constexpr size_t CarriageReturnCount = 10;
 	constexpr int Digit = Utility::GetDigit<ARRSIZE>();
 
 	// Escape to InputKey == ESC
@@ -84,7 +84,7 @@ void SortTest()
 		auto Start = std::chrono::steady_clock::now();
 
 		// Sorting
-		Sort::MergeSort(Arr);
+		Sort::InsertSort(Arr, ARRSIZE);
 		//Sort::SelectionSort(Arr, [](const int& _Left, const int& _Right) -> bool { return _Left > _Right; });
 
 		// Time End

@@ -17,11 +17,9 @@ namespace Sort
 
 #pragma endregion
 #pragma region Bubble
-	template <typename Type, size_t Size, typename Compare>
-	void BubbleSort(Type(&_Arr)[Size], Compare _Comp) noexcept
+	template <typename Type, typename Compare>
+	void BubbleSort(Type _Arr[], size_t _Size, Compare _Comp) noexcept
 	{
-		size_t _Size = Size;
-
 		// 남은 원소 1 이하 == return
 		while (_Size > 1)
 		{
@@ -35,18 +33,18 @@ namespace Sort
 			--_Size;
 		}
 	}
-	template <typename Type, size_t Size>
-	void BubbleSort(Type(&_Arr)[Size]) noexcept
+	template <typename Type>
+	void BubbleSort(Type _Arr[], size_t _Size) noexcept
 	{
-		BubbleSort(_Arr, Utility::DefaultCompare<Type>);
+		BubbleSort(_Arr, _Size, Utility::DefaultCompare<Type>);
 	}
 #pragma endregion
 #pragma region Insert
-	template <typename Type, size_t Size, typename Compare>
-	void InsertSort(Type(&_Arr)[Size], Compare _Comp) noexcept
+	template <typename Type, typename Compare>
+	void InsertSort(Type _Arr[], size_t _Size, Compare _Comp) noexcept
 	{
 		// 첫번째 원소는 정렬 된 것으로 취급
-		for (size_t i = 1; i < Size; ++i)
+		for (size_t i = 1; i < _Size; ++i)
 		{
 			size_t CurIndex = i;
 
@@ -68,24 +66,24 @@ namespace Sort
 			}
 		}
 	}
-	template <typename Type, size_t Size>
-	void InsertSort(Type(&_Arr)[Size]) noexcept
+	template <typename Type>
+	void InsertSort(Type _Arr[], size_t _Size) noexcept
 	{
-		InsertSort(_Arr, Utility::DefaultCompare<Type>);
+		InsertSort(_Arr, _Size, Utility::DefaultCompare<Type>);
 	}
 #pragma endregion
 #pragma region Selection
-	template <typename Type, size_t Size, typename Compare>
-	void SelectionSort(Type(&_Arr)[Size], Compare _Comp) noexcept
+	template <typename Type, typename Compare>
+	void SelectionSort(Type _Arr[], size_t _Size, Compare _Comp) noexcept
 	{
 		// 모든 원소 순회
-		for (size_t i = 0; i < Size; ++i)
+		for (size_t i = 0; i < _Size; ++i)
 		{
 			// 가장 _Comp에 맞는 원소를 찾는다.
 			size_t FindIndex = i;
 
 			// j = i + 1 -> 자기 자신과 비교할 필요 없음
-			for (size_t j = i + 1; j < Size; ++j)
+			for (size_t j = i + 1; j < _Size; ++j)
 			{
 				if (_Comp(_Arr[j], _Arr[FindIndex]))
 					FindIndex = j;
@@ -99,10 +97,10 @@ namespace Sort
 			}
 		}
 	}
-	template <typename Type, size_t Size>
-	void SelectionSort(Type(&_Arr)[Size]) noexcept
+	template <typename Type>
+	void SelectionSort(Type _Arr[], size_t _Size) noexcept
 	{
-		SelectionSort(_Arr, Utility::DefaultCompare<Type>);
+		SelectionSort(_Arr, _Size, Utility::DefaultCompare<Type>);
 	}
 #pragma endregion
 #pragma region Merge
@@ -113,8 +111,8 @@ namespace Sort
 		// 생성자를 delete해 객체를 만들 수 없게 하고,
 		// Function friend와 private로 다른 함수에서 호출할 수 없게 만든다.
 		MergeClass() = delete;
-		template <typename T, size_t i, typename Cmp>
-		friend void MergeSort(T(&_Arr)[i], Cmp _Comp) noexcept;
+		template <typename T, typename Cmp>
+		friend void MergeSort(T _Arr[], size_t _Size, Cmp _Comp) noexcept;
 
 	private:
 		// 정렬을 수행할 메모리를 저장할 포인터.
@@ -127,7 +125,6 @@ namespace Sort
 		inline static Compare* CompPtr = nullptr;
 
 		// 실제 병합, 분할을 하는 함수
-		// 배열 크기를 추론하기 힘드니 시작 인덱스와 사이즈를 직접 받겠다.
 		static void Merge(size_t _StartIndex, size_t _Size) noexcept
 		{
 			// 배열 길이를 반으로 자른다. 분할정복 알고리즘.
@@ -200,16 +197,19 @@ namespace Sort
 		}
 	};
 
-	template <typename Type, size_t Size, typename Compare>
-	void MergeSort(Type (&_Arr)[Size], Compare _Comp) noexcept
+	template <typename Type, typename Compare>
+	void MergeSort(Type _Arr[], size_t _Size, Compare _Comp) noexcept
 	{
-		// 같은 사이즈의 배열을 하나 만들었다.
-		// 큰 것 하나 만들어서 같이 쓴다.
-		MergeClass<Type, Compare>::Index = new size_t[Size];
-		MergeClass<Type, Compare>::Buffer = new size_t[Size];
+		// Size 값이 1 이하면 할 필요도 없다.
+		if (1 >= _Size)
+			return;
+
+		// 같은 사이즈의 인덱스와 버퍼 배열을 하나씩 만들었다.
+		MergeClass<Type, Compare>::Index = new size_t[_Size];
+		MergeClass<Type, Compare>::Buffer = new size_t[_Size];
 
 		// Index의 인덱스 값 초기화
-		for (size_t i = 0; i < Size; ++i)
+		for (size_t i = 0; i < _Size; ++i)
 		{
 			MergeClass<Type, Compare>::Index[i] = i;
 		}
@@ -219,16 +219,16 @@ namespace Sort
 		MergeClass<Type, Compare>::CompPtr = &_Comp;
 
 		// Index 정렬은 여기서 수행.
-		MergeClass<Type, Compare>::Merge(0, Size);
+		MergeClass<Type, Compare>::Merge(0, _Size);
 
 		// 여기서 얻은 Index는 Index[i] == _Arr[i]가 어느 인덱스로 가야 하는가?
 
 		// Buffer에 가야 할 위치의 정보를 집어넣는다.
-		for (size_t k = 0; k < Size; ++k)
+		for (size_t k = 0; k < _Size; ++k)
 			MergeClass<Type, Compare>::Buffer[MergeClass<Type, Compare>::Index[k]] = k;
 
 		// 인덱스 기반으로 Arr 정렬 임시 객체 없이 swap.
-		for (size_t i = 0; i < Size; ++i)
+		for (size_t i = 0; i < _Size; ++i)
 		{
 			// 현재 배열의 위치와 가야 할 위치가 맞는지 체크한다.
 			// 체크 후 정확하다면 다음 인덱스로. 맞는 인덱스가 올때까지 반복.
@@ -243,7 +243,9 @@ namespace Sort
 
 		// 할당한 메모리 해제.
 		// 만약 같은 배열의 정렬을 자주 사용한다면 해제는 프로세스 종료시 마지막에 한번만 하는 것도 고려해봄직 하다.
-		// (기존의 메모리 크기를 기억해두고, 모자라면 재할당하고, 충분하다면 재사용.)
+		// 기존의 메모리 크기를 기억해두고, 모자라면 재할당하고, 충분하다면 재사용.
+		// 다만 템플릿 함수이므로 여러 종류의 함수와 클래스가 만들어지면 메모리 누수가 크게 날 수 있을 것 같다.
+		// 아니라면 안에서 동적 할당을 하지 않고, 임시 버퍼를 밖에서 인자로 받아 오게 해도 괜찮은 방법일수도 있다.
 		delete[] MergeClass<Type, Compare>::Index;
 		delete[] MergeClass<Type, Compare>::Buffer;
 
@@ -253,10 +255,10 @@ namespace Sort
 		MergeClass<Type, Compare>::Buffer = nullptr;
 		MergeClass<Type, Compare>::CompPtr = nullptr;
 	}
-	template <typename Type, size_t Size>
-	void MergeSort(Type(&_Arr)[Size]) noexcept
+	template <typename Type>
+	void MergeSort(Type _Arr[], size_t _Size) noexcept
 	{
-		MergeSort(_Arr, Utility::DefaultCompare<Type>);
+		MergeSort(_Arr, _Size, Utility::DefaultCompare<Type>);
 	}
 
 #pragma endregion
