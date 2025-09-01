@@ -189,7 +189,7 @@ namespace Sort
 			// 그냥 for문 쓰겠다.
 			for (size_t i = _StartIndex; i < _StartIndex + _Size; ++i)
 			{
-				Arr[i] = std::move(MergeClass<Type, Compare>::NewArr[i]);
+				Arr[i] = MergeClass<Type, Compare>::NewArr[i]);
 			}
 		}
 	};
