@@ -16,3 +16,4 @@ void ArrShuffle(Type (&_Arr)[_Size])
 	for (size_t i = _Size - 1; i > 0; --i)
 		Utility::Swap(_Arr[i], _Arr[gen() % (i + 1)]);
 }
+

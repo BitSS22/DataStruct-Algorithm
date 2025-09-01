@@ -260,7 +260,7 @@ namespace Sort
 #pragma region Shell
 	// Insert 함수에서 긁어왔다.
 	// ShellSort는 결국 InsertSort의 반복.
-	template <typename Type, typename Compare>
+	//template <typename Type, typename Compare>
 	void ShellSort(Type _Arr[], size_t _Size, Compare _Comp) noexcept
 	{
 		// 초기 Gap은 절반. Gap == 1 은 InsertSort. Gap을 절반씩 나눈다.
@@ -281,7 +281,7 @@ namespace Sort
 			}
 		}
 	}
-	template <typename Type>
+	//template <typename Type>
 	void ShellSort(Type _Arr[], size_t _Size) noexcept
 	{
 		ShellSort(_Arr, _Size, Utility::DefaultCompare<Type>);

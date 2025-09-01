@@ -43,14 +43,14 @@ int main()
 void SortTest()
 {
 	// Arr Option
-	constexpr size_t ARRSIZE = 30;
-	constexpr size_t CarriageReturnCount = 10;
+	constexpr size_t ARRSIZE = 11;
+	constexpr size_t CarriageReturnCount = 40;
 	constexpr int Digit = Utility::GetDigit<ARRSIZE>();
-
+	
 	// Escape to InputKey == ESC
 	int InputKey = 0;
 	constexpr int EscapeKey = 27;
-
+	
 	// GetTimes
 	std::vector<double> Elapseds = {};
 
@@ -84,8 +84,8 @@ void SortTest()
 		auto Start = std::chrono::steady_clock::now();
 
 		// Sorting
-		//Sort::ShellSort(Arr, ARRSIZE);
-		Sort::ShellSort(Arr, ARRSIZE, [](const int& _Left, const int& _Right) -> bool { return _Left > _Right; });
+		Sort::ShellSort(Arr, ARRSIZE);
+		//Sort::ShellSort(Arr, ARRSIZE, [](const int& _Left, const int& _Right) noexcept -> bool { return _Left > _Right; });
 
 		// Time End
 		auto End = std::chrono::steady_clock::now();
