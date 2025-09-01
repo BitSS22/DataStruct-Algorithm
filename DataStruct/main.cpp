@@ -43,8 +43,8 @@ int main()
 void SortTest()
 {
 	// Arr Option
-	constexpr size_t ARRSIZE = 200;
-	constexpr size_t CarriageReturnCount = 20;
+	constexpr size_t ARRSIZE = 5;
+	constexpr size_t CarriageReturnCount = 10;
 	constexpr int Digit = Utility::GetDigit<ARRSIZE>();
 
 	// Escape to InputKey == ESC

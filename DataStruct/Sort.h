@@ -20,7 +20,6 @@ namespace Sort
 	template <typename Type, size_t Size, typename Compare>
 	void BubbleSort(Type(&_Arr)[Size], Compare _Comp) noexcept
 	{
-		assert(_Comp);
 		size_t _Size = Size;
 
 		// 남은 원소 1 이하 == return
@@ -46,8 +45,6 @@ namespace Sort
 	template <typename Type, size_t Size, typename Compare>
 	void InsertSort(Type(&_Arr)[Size], Compare _Comp) noexcept
 	{
-		assert(_Comp);
-
 		// 첫번째 원소는 정렬 된 것으로 취급
 		for (size_t i = 1; i < Size; ++i)
 		{
@@ -81,20 +78,25 @@ namespace Sort
 	template <typename Type, size_t Size, typename Compare>
 	void SelectionSort(Type(&_Arr)[Size], Compare _Comp) noexcept
 	{
-		assert(_Comp);
-
 		// 모든 원소 순회
 		for (size_t i = 0; i < Size; ++i)
 		{
 			// 가장 _Comp에 맞는 원소를 찾는다.
 			size_t FindIndex = i;
-			for (size_t j = i; j < Size; ++j)
+
+			// j = i + 1 -> 자기 자신과 비교할 필요 없음
+			for (size_t j = i + 1; j < Size; ++j)
 			{
 				if (_Comp(_Arr[j], _Arr[FindIndex]))
 					FindIndex = j;
 			}
+
 			// 찾은 원소를 i번째 원소와 교환한다.
-			Utility::Swap(_Arr[i], _Arr[FindIndex]);
+			// 자기 자신이면 교환하지 않음.
+			if (FindIndex != i)
+			{
+				Utility::Swap(_Arr[i], _Arr[FindIndex]);
+			}
 		}
 	}
 	template <typename Type, size_t Size>
@@ -201,13 +203,13 @@ namespace Sort
 	template <typename Type, size_t Size, typename Compare>
 	void MergeSort(Type (&_Arr)[Size], Compare _Comp) noexcept
 	{
-		assert(Size);
-		assert(_Comp);
-
 		// 같은 사이즈의 배열을 하나 만들었다.
 		// 큰 것 하나 만들어서 같이 쓴다.
 		MergeClass<Type, Compare>::Index = new size_t[Size];
 		MergeClass<Type, Compare>::Buffer = new size_t[Size];
+
+		auto& DEBUGINDEX = MergeClass<Type, Compare>::Index;
+		auto& DEBUGBUFFER = MergeClass<Type, Compare>::Buffer;
 
 		// Index의 인덱스 값 초기화
 		for (size_t i = 0; i < Size; ++i)
@@ -219,26 +221,29 @@ namespace Sort
 		MergeClass<Type, Compare>::Arr = _Arr;
 		MergeClass<Type, Compare>::CompPtr = &_Comp;
 
-		// 실제 정렬은 여기서 수행.
+		// Index 정렬은 여기서 수행.
 		MergeClass<Type, Compare>::Merge(0, Size);
 
+		// Buffer에 가야 할 위치의 정보를 집어넣는다.
 		for (size_t k = 0; k < Size; ++k)
 			MergeClass<Type, Compare>::Buffer[MergeClass<Type, Compare>::Index[k]] = k;
 
 		// 인덱스 기반으로 Arr 정렬
 		for (size_t i = 0; i < Size; ++i)
 		{
-			// i가 제자리인지 확인
+			// 현재 배열의 위치와 가야 할 위치가 맞는지 체크한다.
+			// 체크 후 정확하다면 다음 인덱스로. 맞는 인덱스가 올때까지 반복.
 			while (i != MergeClass<Type, Compare>::Buffer[i])
 			{
+				// j == 어디로 가야 하는가?
 				size_t j = MergeClass<Type, Compare>::Buffer[i];
 				Utility::Swap(_Arr[i], _Arr[j]);
-				Utility::Swap(MergeClass<Type, Compare>::Buffer[i], MergeClass<Type, Compare>::Buffer[j]);
+				Utility::Swap(MergeClass<Type, Compare>::Buffer[i], MergeClass<Type, Compare>::Buffer[j]); // 실제 배열 swap 후 동기화 작업.
 			}
 		}
 
 		// 할당한 메모리 해제.
-		// 만약 정렬을 자주 사용한다면 해제는 프로세스 종료시 마지막에 한번만 하는 것도 고려해봄직 하다.
+		// 만약 같은 배열의 정렬을 자주 사용한다면 해제는 프로세스 종료시 마지막에 한번만 하는 것도 고려해봄직 하다.
 		// (기존의 메모리 크기를 기억해두고, 모자라면 재할당하고, 충분하다면 재사용.)
 		delete[] MergeClass<Type, Compare>::Index;
 		delete[] MergeClass<Type, Compare>::Buffer;
