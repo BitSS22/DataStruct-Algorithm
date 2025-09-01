@@ -51,7 +51,7 @@ namespace Sort
 			Type Inst = std::move(_Arr[Iter]);
 
 			// (정렬 된) 이전 값과 비교해서 이전 값을 밀어냄.
-			while (_Comp(Inst, _Arr[Iter - 1]) && Iter > 0)
+			while (Iter > 0 && _Comp(Inst, _Arr[Iter - 1]))
 			{
 				_Arr[Iter] = _Arr[Iter - 1];
 				--Iter;
@@ -258,30 +258,50 @@ namespace Sort
 
 #pragma endregion
 #pragma region Shell
+	// Ciura 수열. 실험적으로 찾아낸 ShellSort에 효율적인 수열.
+	// 701 이상 값은 모른다. 알아서 하자.
+	constexpr size_t CiuraSequence[] = { 701, 301, 132, 57, 23, 10, 4, 1, 0 };
+
 	// Insert 함수에서 긁어왔다.
 	// ShellSort는 결국 InsertSort의 반복.
-	//template <typename Type, typename Compare>
+	template <typename Type, typename Compare>
 	void ShellSort(Type _Arr[], size_t _Size, Compare _Comp) noexcept
 	{
-		// 초기 Gap은 절반. Gap == 1 은 InsertSort. Gap을 절반씩 나눈다.
-		for (size_t Gap = _Size / 2; Gap > 0; Gap /= 2)
+		// 배열 크기 1 이하면 정렬할 필요도 없다.
+		if (2 > _Size)
+			return;
+
+		// 시작할 적절한 Gap을 찾는다.
+		size_t Ciura = 0;
+		while (_Size < CiuraSequence[Ciura])
+			++Ciura;
+
+		// Gap == 1 은 InsertSort.
+		while (CiuraSequence[Ciura] > 0)
 		{
+			// Gap Index까지(부분 배열의 첫번째 원소들)은 정렬 된 것.
+			size_t Gap = CiuraSequence[Ciura];
+
+			// i가 Gap만큼 커지면 부분 배열들의 원소 하나씩 확인 한 것.
 			for (size_t i = Gap; i < _Size; ++i)
 			{
 				size_t Iter = i;
 				Type Inst = std::move(_Arr[Iter]);
 
-				while (_Comp(Inst, _Arr[Iter - Gap]) && Iter >= Gap)
+				// Iter가 Gap보다 작으면 음수 인덱스 접근.
+				while (Iter >= Gap && _Comp(Inst, _Arr[Iter - Gap]))
 				{
-					_Arr[Iter] = _Arr[Iter - Gap];
-					Iter -= Gap;
+					_Arr[Iter] = std::move(_Arr[Iter - Gap]);
+					Iter -= Gap; // Iter는 Gap만큼 이동해야 부분 배열을 순회한다.
 				}
 
 				_Arr[Iter] = std::move(Inst);
 			}
+			// 다음 부분 배열로.
+			++Ciura;
 		}
 	}
-	//template <typename Type>
+	template <typename Type>
 	void ShellSort(Type _Arr[], size_t _Size) noexcept
 	{
 		ShellSort(_Arr, _Size, Utility::DefaultCompare<Type>);
