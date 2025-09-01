@@ -84,8 +84,8 @@ void SortTest()
 		auto Start = std::chrono::steady_clock::now();
 
 		// Sorting
-		Sort::InsertSort(Arr, ARRSIZE);
-		//Sort::SelectionSort(Arr, [](const int& _Left, const int& _Right) -> bool { return _Left > _Right; });
+		//Sort::ShellSort(Arr, ARRSIZE);
+		Sort::ShellSort(Arr, ARRSIZE, [](const int& _Left, const int& _Right) -> bool { return _Left > _Right; });
 
 		// Time End
 		auto End = std::chrono::steady_clock::now();

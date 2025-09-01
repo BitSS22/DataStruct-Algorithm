@@ -46,15 +46,18 @@ namespace Sort
 		// 첫번째 원소는 정렬 된 것으로 취급
 		for (size_t i = 1; i < _Size; ++i)
 		{
+			// 현재 순회하는 인덱스 위치와 값을 받아둔다.
 			size_t Iter = i;
 			Type Inst = std::move(_Arr[Iter]);
 
+			// (정렬 된) 이전 값과 비교해서 이전 값을 밀어냄.
 			while (_Comp(Inst, _Arr[Iter - 1]) && Iter > 0)
 			{
 				_Arr[Iter] = _Arr[Iter - 1];
 				--Iter;
 			}
 
+			// 적절한 위치에 이동.
 			_Arr[Iter] = std::move(Inst);
 		}
 	}
@@ -257,30 +260,31 @@ namespace Sort
 #pragma region Shell
 	// Insert 함수에서 긁어왔다.
 	// ShellSort는 결국 InsertSort의 반복.
-	void ShellSort(Type _Arr[], size_t _Size, Compare _Comp = Utility::DefaultCompare<Type>) noexcept
+	template <typename Type, typename Compare>
+	void ShellSort(Type _Arr[], size_t _Size, Compare _Comp) noexcept
 	{
 		// 초기 Gap은 절반. Gap == 1 은 InsertSort. Gap을 절반씩 나눈다.
 		for (size_t Gap = _Size / 2; Gap > 0; Gap /= 2)
 		{
 			for (size_t i = Gap; i < _Size; ++i)
 			{
-				size_t CurIndex = i;
+				size_t Iter = i;
+				Type Inst = std::move(_Arr[Iter]);
 
-				while (CurIndex > Gap)
+				while (_Comp(Inst, _Arr[Iter - Gap]) && Iter >= Gap)
 				{
-					if (_Comp(_Arr[CurIndex], _Arr[CurIndex - Gap]))
-					{
-						Utility::Swap(_Arr[CurIndex], _Arr[CurIndex - Gap]);
-						CurIndex -= Gap;
-					}
-					else
-					{
-						break;
-					}
+					_Arr[Iter] = _Arr[Iter - Gap];
+					Iter -= Gap;
 				}
+
+				_Arr[Iter] = std::move(Inst);
 			}
 		}
-		
+	}
+	template <typename Type>
+	void ShellSort(Type _Arr[], size_t _Size) noexcept
+	{
+		ShellSort(_Arr, _Size, Utility::DefaultCompare<Type>);
 	}
 #pragma endregion
 #pragma region Heap
