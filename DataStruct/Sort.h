@@ -208,9 +208,6 @@ namespace Sort
 		MergeClass<Type, Compare>::Index = new size_t[Size];
 		MergeClass<Type, Compare>::Buffer = new size_t[Size];
 
-		auto& DEBUGINDEX = MergeClass<Type, Compare>::Index;
-		auto& DEBUGBUFFER = MergeClass<Type, Compare>::Buffer;
-
 		// Index의 인덱스 값 초기화
 		for (size_t i = 0; i < Size; ++i)
 		{
@@ -224,11 +221,13 @@ namespace Sort
 		// Index 정렬은 여기서 수행.
 		MergeClass<Type, Compare>::Merge(0, Size);
 
+		// 여기서 얻은 Index는 Index[i] == _Arr[i]가 어느 인덱스로 가야 하는가?
+
 		// Buffer에 가야 할 위치의 정보를 집어넣는다.
 		for (size_t k = 0; k < Size; ++k)
 			MergeClass<Type, Compare>::Buffer[MergeClass<Type, Compare>::Index[k]] = k;
 
-		// 인덱스 기반으로 Arr 정렬
+		// 인덱스 기반으로 Arr 정렬 임시 객체 없이 swap.
 		for (size_t i = 0; i < Size; ++i)
 		{
 			// 현재 배열의 위치와 가야 할 위치가 맞는지 체크한다.
