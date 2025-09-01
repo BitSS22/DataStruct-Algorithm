@@ -117,9 +117,11 @@ namespace Sort
 	private:
 		// 정렬을 수행할 메모리를 저장할 포인터.
 		// 기존 Arr, NewArr, Comp를 저장해 함수 인자 갯수를 줄일 것이다.
+		// 배열 내의 객체를 이동, 복사를 최소화 하기 위해 index 기반으로 정렬 한다.
 		// 당연히 데이터 영역에 하나만 있으므로, 쓰레드 언세이프 할 것이다.
 		inline static Type* Arr = nullptr;
-		inline static Type* NewArr = nullptr;
+		inline static size_t* Index = nullptr;
+		inline static size_t* Buffer = nullptr;
 		inline static Compare Comp = nullptr;
 
 		// 실제 병합, 분할을 하는 함수
@@ -152,15 +154,18 @@ namespace Sort
 			// 두 배열의 원소가 둘 다 남아있는가?
 			while (LeftIter < LeftSize && RightIter < RightSize)
 			{
+				const Type& Left = Arr[Index[LeftStart + LeftIter]];
+				const Type& Right = Arr[Index[RightStart + RightIter]];
+
 				// Comp 함수가 true / false에 따라.
-				if (Comp(Arr[RightStart + RightIter], Arr[LeftStart + LeftIter]))
+				if (Comp(Right, Left))
 				{
-					NewArr[WriteIndex] = Arr[RightStart + RightIter];
+					Buffer[WriteIndex] = Index[RightStart + RightIter];
 					++RightIter;
 				}
 				else
 				{
-					NewArr[WriteIndex] = Arr[LeftStart + LeftIter];
+					Buffer[WriteIndex] = Index[LeftStart + LeftIter];
 					++LeftIter;
 				}
 
@@ -173,23 +178,22 @@ namespace Sort
 			// Left
 			while (LeftIter < LeftSize)
 			{
-				NewArr[WriteIndex] = Arr[LeftStart + LeftIter];
+				Buffer[WriteIndex] = Index[LeftStart + LeftIter];
 				++WriteIndex;
 				++LeftIter;
 			}
 			// Right
 			while (RightIter < RightSize)
 			{
-				NewArr[WriteIndex] = Arr[RightStart + RightIter];
+				Buffer[WriteIndex] = Index[RightStart + RightIter];
 				++WriteIndex;
 				++RightIter;
 			}
 
-			// 정렬 된 NewArr를 _Arr로 복사한다.
-			// 그냥 for문 쓰겠다.
+			// Index 정렬
 			for (size_t i = _StartIndex; i < _StartIndex + _Size; ++i)
 			{
-				Arr[i] = MergeClass<Type, Compare>::NewArr[i]);
+				Index[i] = Buffer[i];
 			}
 		}
 	};
@@ -202,10 +206,14 @@ namespace Sort
 
 		// 같은 사이즈의 배열을 하나 만들었다.
 		// 큰 것 하나 만들어서 같이 쓴다.
-		MergeClass<Type, Compare>::NewArr = reinterpret_cast<Type*>(malloc(sizeof(Type) * Size));
-		// malloc failed, nullptr return.
-		if (nullptr == MergeClass<Type, Compare>::NewArr)
-			return;
+		MergeClass<Type, Compare>::Index = new size_t[Size];
+		MergeClass<Type, Compare>::Buffer = new size_t[Size];
+
+		// Index의 인덱스 값 초기화
+		for (size_t i = 0; i < Size; ++i)
+		{
+			MergeClass<Type, Compare>::Index[i] = i;
+		}
 
 		// MergeClass 변수 값을 설정해준다.
 		MergeClass<Type, Compare>::Arr = _Arr;
@@ -214,14 +222,31 @@ namespace Sort
 		// 실제 정렬은 여기서 수행.
 		MergeClass<Type, Compare>::Merge(0, Size);
 
+		for (size_t k = 0; k < Size; ++k)
+			MergeClass<Type, Compare>::Buffer[MergeClass<Type, Compare>::Index[k]] = k;
+
+		// 인덱스 기반으로 Arr 정렬
+		for (size_t i = 0; i < Size; ++i)
+		{
+			// i가 제자리인지 확인
+			while (i != MergeClass<Type, Compare>::Buffer[i])
+			{
+				size_t j = MergeClass<Type, Compare>::Buffer[i];
+				Utility::Swap(_Arr[i], _Arr[j]);
+				Utility::Swap(MergeClass<Type, Compare>::Buffer[i], MergeClass<Type, Compare>::Buffer[j]);
+			}
+		}
+
 		// 할당한 메모리 해제.
 		// 만약 정렬을 자주 사용한다면 해제는 프로세스 종료시 마지막에 한번만 하는 것도 고려해봄직 하다.
 		// (기존의 메모리 크기를 기억해두고, 모자라면 재할당하고, 충분하다면 재사용.)
-		free(MergeClass<Type, Compare>::NewArr);
+		delete[] MergeClass<Type, Compare>::Index;
+		delete[] MergeClass<Type, Compare>::Buffer;
 
 		// 머문 자리도 아름답게.
 		MergeClass<Type, Compare>::Arr = nullptr;
-		MergeClass<Type, Compare>::NewArr = nullptr;
+		MergeClass<Type, Compare>::Index = nullptr;
+		MergeClass<Type, Compare>::Buffer = nullptr;
 		MergeClass<Type, Compare>::Comp = nullptr;
 	}
 	template <typename Type, size_t Size>
