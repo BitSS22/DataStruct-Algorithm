@@ -3,11 +3,9 @@
 #include <assert.h>
 #include "Utility.h"
 
-#ifdef _DEBUG
+// Debug def
 typedef bool(*Compare)(const int&, const int&);
 typedef int Type;
-#endif
-
 
 namespace Sort
 {
@@ -26,6 +24,7 @@ namespace Sort
 		// 남은 원소 1 이하 == return
 		while (_Size > 1)
 		{
+			// 정렬이 일어났는지를 체크해 최적화 할 수 있겠지만, 안하겠다.
 			for (size_t i = 0; i < _Size - 1; ++i)
 			{
 				// 다음 원소와 현재 원소 비교, true == Swap
