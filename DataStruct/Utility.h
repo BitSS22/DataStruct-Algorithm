@@ -5,9 +5,9 @@ namespace Utility
 	template<typename Type>
 	inline void Swap(Type& _Left, Type& _Right)
 	{
-		Type Temp = std::move(_Left);
-		_Left = std::move(_Right);
-		_Right = std::move(Temp);
+		Type Temp = std::move_if_noexcept(_Left);
+		_Left = std::move_if_noexcept(_Right);
+		_Right = std::move_if_noexcept(Temp);
 	}
 
 	template<typename Type>

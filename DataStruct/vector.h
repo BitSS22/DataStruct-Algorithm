@@ -1,5 +1,9 @@
 #pragma once
 #include <assert.h>
+#include <cstddef>
+#include <new>
+#include <memory>
+#include <utility>
 
 // 원활한 템플릿 코드 작성을 위한 using. 나중에 주석 처리한다.
 using Type = int;
@@ -24,7 +28,7 @@ public:
 			}
 
 			// 메모리 해제 해줘.
-			if constexpr (alignof(Type) > alignof(max_align_t))
+			if constexpr (alignof(Type) > alignof(std::max_align_t))
 			{
 				::operator delete(Arr, std::align_val_t(alignof(Type)));
 			}
@@ -32,6 +36,11 @@ public:
 			{
 				::operator delete(Arr);
 			}
+
+			// 초기 값으로 밀어버리기.
+			Arr = nullptr;
+			Size = 0;
+			Capacity = 0;
 		}
 	}
 
@@ -84,8 +93,16 @@ public:
 
 	void Reserve(size_t _NewCapacity)
 	{
+		// 오버플로우 방지.
+		if (_NewCapacity > SIZE_MAX / sizeof(Type))
+			return;
+
 		// 크기를 늘릴때만 호출해라. 아니면 부르지 마.
 		if (Capacity >= _NewCapacity)
+			return;
+
+		// 외부에서 Reserve 호출했는데, 기존 Size보다 작거나 같으면 무시.
+		if (Size >= _NewCapacity)
 			return;
 
 		// 일단 포인터 변수 하나 만들기.
@@ -94,17 +111,17 @@ public:
 		// alignof(Type) 이건 타입의 얼라인 값이야. (캐시 라인 정렬)
 		// 최대 얼라인 크기보다 크니?
 		// if constexpr == 컴파일 타임 분기 처리.
-		if constexpr (alignof(Type) > alignof(max_align_t))
+		if constexpr (alignof(Type) > alignof(std::max_align_t))
 		{
 			// std::nothrow 예외 던지지 말고 nullptr 줘.
 			// 크면 align_val_t를 사용한 얼라인 정렬 new를 사용한다.
 			// std::align_val_t(alignof(Type)) Type의 align 정보만큼 정렬해야 해. (오버얼라인)
-			NewArr = reinterpret_cast<Type*>(::operator new(sizeof(Type) * _NewCapacity, std::align_val_t(alignof(Type)), std::nothrow));
+			NewArr = static_cast<Type*>(::operator new(sizeof(Type) * _NewCapacity, std::align_val_t(alignof(Type))));
 		}
 		else
 		{
 			// 아니면 그냥 new 써.
-			NewArr = reinterpret_cast<Type*>(::operator new(sizeof(Type) * _NewCapacity, std::nothrow));
+			NewArr = static_cast<Type*>(::operator new(sizeof(Type) * _NewCapacity));
 		}
 		
 		// NewArr == nullptr이면 할당 실패.
@@ -125,7 +142,7 @@ public:
 
 		// Arr 메모리 반환.
 		// new 처럼 Type의 얼라인에 따라 컴파일 타임 분기 처리.
-		if constexpr (alignof(Type) > alignof(max_align_t))
+		if constexpr (alignof(Type) > alignof(std::max_align_t))
 		{
 			::operator delete(Arr, std::align_val_t(alignof(Type)));
 		}
@@ -154,7 +171,14 @@ public:
 	{
 		return Capacity;
 	}
-	Type* GetData() const noexcept
+	
+	// GetData를 오버로드 한다.
+	// const vector에서는 아래 것이 호출돼서 수정 불가능. 그냥 vector에서는 위의 것이 호출된다.
+	Type* GetData() noexcept
+	{
+		return Arr;
+	}
+	const Type* GetData() const noexcept
 	{
 		return Arr;
 	}
