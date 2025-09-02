@@ -47,7 +47,7 @@ public:
 	}
 
 	// R-Value 버전 오버로드
-	void PushBack(Type&& _Item) noexcept
+	void PushBack(Type&& _Item)
 	{
 		if (Size >= Capacity)
 		{
@@ -73,7 +73,7 @@ public:
 		// alignof(Type) 이건 타입의 얼라인 값이야. (캐시 라인 정렬)
 		// 최대 얼라인 크기보다 크니?
 		// if constexpr == 컴파일 타임 분기 처리.
-		if constexpr (alignof(Type) > sizeof(max_align_t))
+		if constexpr (alignof(Type) > alignof(max_align_t))
 		{
 			// std::nothrow 예외 던지지 말고 nullptr 줘.
 			// 크면 align_val_t를 사용한 얼라인 정렬 new를 사용한다.
@@ -96,21 +96,21 @@ public:
 		// 기존 Arr의 요소를 이동시킨다.
 		for (size_t i = 0; i < Size; ++i)
 		{
-			// 저쪽 위치에 생성해줘. 이동 생성자 있으면 호출해줘.
-			new(NewArr + i) Type(std::move(Arr[i]));
+			// 저쪽 위치에 생성해줘. 이동 생성자 있으면 호출해줘. noexcept일때만.
+			new(NewArr + i) Type(std::move_if_noexcept(Arr[i]));
 			// 기존 배열의 요소들의 소멸자 호출시켜서 정리한다.
 			std::destroy_at(Arr + i);
 		}
 
 		// Arr 메모리 반환.
 		// new 처럼 Type의 얼라인에 따라 컴파일 타임 분기 처리.
-		if constexpr (alignof(Type) > sizeof(max_align_t))
+		if constexpr (alignof(Type) > alignof(max_align_t))
 		{
-			::operator delete(Arr, std::align_val_t(alignof(Type)), std::nothrow);
+			::operator delete(Arr, std::align_val_t(alignof(Type)));
 		}
 		else
 		{
-			::operator delete(Arr, std::nothrow);
+			::operator delete(Arr);
 		}
 		
 		// 배열 주소와 Capacity 갱신.
