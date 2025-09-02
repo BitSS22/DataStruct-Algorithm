@@ -47,7 +47,7 @@ public:
 	}
 
 	// R-Value 버전 오버로드
-	void PushBack(Type&& _Item)
+	void PushBack(Type&& _Item) noexcept
 	{
 		if (Size >= Capacity)
 		{
@@ -62,12 +62,51 @@ public:
 
 	void Reserve(size_t _NewCapacity)
 	{
-		// 크기를 늘릴때만 호출해라.
+		// 크기를 늘릴때만 호출해라. 아니면 부르지 마.
 		if (Capacity >= _NewCapacity)
 			return;
 
-		// 새로운 메모리 공간'만' 할당 하겠다. _NewCapacity만큼.
-		Type* NewArr = reinterpret_cast<Type*>(::operator new(sizeof(Type) * _NewCapacity));
+		// 일단 포인터 변수 하나 만들기.
+		Type* NewArr = nullptr;
+
+		// alignof(Type) 이건 타입의 얼라인 값이야. (캐시 라인 정렬)
+		// 최대 얼라인 크기보다 크니?
+		// if constexpr == 컴파일 타임 분기 처리.
+		if constexpr (alignof(Type) > sizeof(max_align_t))
+		{
+			// std::nothrow 예외 던지지 말고 nullptr 줘.
+			// 크면 align_val_t를 사용한 얼라인 정렬 new를 사용한다.
+			// std::align_val_t(alignof(Type)) Type의 align 정보만큼 정렬해야 해. (오버얼라인)
+			NewArr = reinterpret_cast<Type*>(::operator new(sizeof(Type) * _NewCapacity, std::align_val_t(alignof(Type)), std::nothrow));
+		}
+		else
+		{
+			// 아니면 그냥 new 써.
+			NewArr = reinterpret_cast<Type*>(::operator new(sizeof(Type) * _NewCapacity, std::nothrow));
+		}
+		
+		// NewArr == nullptr이면 할당 실패.
+		if (!NewArr)
+		{
+			// 뭔가 이상해. 일단 return. 예외 처리 추후에. TODO.
+			return;
+		}
+
+		// 기존 Arr의 요소를 이동시킨다.
+		for (size_t i = 0; i < Size; ++i)
+		{
+			// 저쪽 위치에 생성해줘. 이동 생성자 있으면 호출해줘.
+			new(NewArr + i) Type(std::move(Arr[i]));
+			// 기존 배열의 요소들의 소멸자 호출시켜서 정리한다.
+			std::destroy_at(Arr + i);
+		}
+
+		// Arr 메모리 반환.
+		::operator delete(Arr, std::align_val_t(alignof(Type)));
+
+		// 배열 주소와 Capacity 갱신.
+		Arr = NewArr;
+		Capacity = _NewCapacity;
 	}
 
 private:
