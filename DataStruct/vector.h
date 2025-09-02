@@ -56,7 +56,8 @@ public:
 		}
 
 		// _Item을 move로 R-Value 캐스팅 하는 부분이 다름.
-		new(Arr + Size) Type(std::move(_Item));
+		// move_if_noexcept Type의 R-Value constructor가 noexcept니?
+		new(Arr + Size) Type(std::move_if_noexcept(_Item));
 		++Size;
 	}
 
@@ -102,8 +103,16 @@ public:
 		}
 
 		// Arr 메모리 반환.
-		::operator delete(Arr, std::align_val_t(alignof(Type)));
-
+		// new 처럼 Type의 얼라인에 따라 컴파일 타임 분기 처리.
+		if constexpr (alignof(Type) > sizeof(max_align_t))
+		{
+			::operator delete(Arr, std::align_val_t(alignof(Type)), std::nothrow);
+		}
+		else
+		{
+			::operator delete(Arr, std::nothrow);
+		}
+		
 		// 배열 주소와 Capacity 갱신.
 		Arr = NewArr;
 		Capacity = _NewCapacity;
