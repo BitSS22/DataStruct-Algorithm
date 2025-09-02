@@ -12,7 +12,28 @@ class vector
 {
 public:
 	vector() {}
-	~vector() {}
+	~vector()
+	{
+		// Arr이 nullptr이 아니면 메모리 해제.
+		if (nullptr != Arr)
+		{
+			// 소멸자 호출 해줘.
+			for (size_t i = 0; i < Size; ++i)
+			{
+				std::destroy_at(Arr + i);
+			}
+
+			// 메모리 해제 해줘.
+			if constexpr (alignof(Type) > alignof(max_align_t))
+			{
+				::operator delete(Arr, std::align_val_t(alignof(Type)));
+			}
+			else
+			{
+				::operator delete(Arr);
+			}
+		}
+	}
 
 	// 코드 작성중에 내가 원하지 않는 복사나 이동을 확인하기 위해서.
 	vector(const vector& _Other) = delete;
