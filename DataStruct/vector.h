@@ -124,13 +124,6 @@ public:
 			NewArr = static_cast<Type*>(::operator new(sizeof(Type) * _NewCapacity));
 		}
 		
-		// NewArr == nullptr이면 할당 실패.
-		if (!NewArr)
-		{
-			// 뭔가 이상해. 일단 return. 예외 처리 추후에. TODO.
-			return;
-		}
-
 		// 기존 Arr의 요소를 이동시킨다.
 		for (size_t i = 0; i < Size; ++i)
 		{
