@@ -37,8 +37,13 @@ int main()
 	// Memory Leak Check
 	_CrtSetDbgFlag(_CRTDBG_LEAK_CHECK_DF | _CRTDBG_ALLOC_MEM_DF);
 
+	std::vector<int> vv = {};
+	vv.pop_back();
 
 	vector v = {};
+
+	vv[3];
+	vv.at(3);
 	
 	for (size_t i = 0; i < 10; ++i)
 	{

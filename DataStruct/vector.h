@@ -43,8 +43,25 @@ public:
 	// 코드 작성중에 내가 원하지 않는 복사나 이동을 확인하기 위해서.
 	vector(const vector& _Other) = delete;
 	vector(vector&& _Other) = delete;
+
+public:
 	vector& operator= (const vector& _Other) = delete;
 	vector& operator= (vector&& _Other) = delete;
+
+	// [] operator, &로 반환한다.
+	// 예외를 던지지 않는다.
+	Type& operator[](size_t _Index) noexcept
+	{
+		// debug에서만 동작하는 검사
+		assert(_Index < Size);
+		return Arr[_Index];
+	}
+	// const& 오버로딩.
+	const Type& operator[](size_t _Index) const noexcept
+	{
+		assert(_Index < Size);
+		return Arr[_Index];
+	}
 
 private:
 	// 필요한건 동적할당 받은 메모리 위치, 엘리먼트 갯수, 메모리의 크기.
@@ -177,6 +194,16 @@ public:
 		Capacity = _NewCapacity;
 	}
 
+	// 맨 뒤에꺼 하나 지워줘
+	void PopBack() noexcept
+	{
+		// Size 0보다 커야 해.
+		assert(Size);
+
+		// 맨 마지막꺼 하나 소멸자 호출.
+		std::destroy_at(Arr + (Size - 1));
+	}
+
 	// 안에 있는거 다 지워줘.
 	void Clear() noexcept
 	{
@@ -192,7 +219,6 @@ public:
 
 private:
 	// 내부에서만 쓸 함수.
-	
 
 public:
 	// 간단한 Get, Set 함수들.
@@ -217,4 +243,31 @@ public:
 		return Arr;
 	}
 
+	// 끝에 있는거 줘.
+	Type& Back() noexcept
+	{
+		// assert는 debug 빌드에서만. release에서 호출하면 정의되지 않은 동작으로 큰 위험 요소 있음.
+		// 근데 std::vector의 구현이 이렇다.
+		assert(Size);
+		return Arr[Size - 1];
+	}
+	const Type& Back() const noexcept
+	{
+		assert(Size);
+		return Arr[Size - 1];
+	}
+
+	// operator[] 와 가장 큰 차이점은, 인덱스 오버시 out_of_range exception이 발생돼서 전파됨.
+	// 그래서 At 함수는 noexcept가 아니다.
+	Type& At(size_t _Index)
+	{
+		// 그래도 debug에서 검사 해야지.
+		assert(Size);
+		return Arr[_Index];
+	}
+	const Type& At(size_t _Index) const
+	{
+		assert(Size);
+		return Arr[_Index];
+	}
 };
