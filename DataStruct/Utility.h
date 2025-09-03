@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 
 namespace Utility
 {
@@ -16,26 +17,10 @@ namespace Utility
 		return _Left < _Right;
 	}
 
-	template<int _Value>
-	constexpr int GetDigit() noexcept
+	constexpr size_t GetDigit(size_t _Value) noexcept
 	{
-		static_assert(_Value != 0, "GetDigit Agument is Zero.");
-
-		int Count = 0;
-
-		int v = _Value;
-		while (v > 0)
-		{
-			v /= 10;
-			++Count;
-		}
-
-		return Count;
-	}
-
-	size_t GetDigit(size_t _Value) noexcept
-	{
-		assert(_Value != 0);
+		if (!_Value)
+			return 0;
 
 		size_t Count = 0;
 
@@ -49,9 +34,10 @@ namespace Utility
 		return Count;
 	}
 
-	int GetDigit(int _Value) noexcept
+	constexpr int GetDigit(int _Value) noexcept
 	{
-		assert(_Value != 0);
+		if (!_Value)
+			return 0;
 
 		int Count = 0;
 

@@ -36,8 +36,20 @@ int main()
 {
 	// Memory Leak Check
 	_CrtSetDbgFlag(_CRTDBG_LEAK_CHECK_DF | _CRTDBG_ALLOC_MEM_DF);
-	std::vector<int> v;
-	v.data();
+
+
+	vector v = {};
+	
+	for (size_t i = 0; i < 10; ++i)
+	{
+		v.PushBack(i);
+	}
+
+	for (size_t i = 0; i < v.GetSize(); ++i)
+	{
+		std::cout << v.GetData()[i] << " ";
+	}
+	
 	SortTest();
 }
 
@@ -46,7 +58,7 @@ void SortTest()
 	// Arr Option
 	constexpr size_t ARRSIZE = 11;
 	constexpr size_t CarriageReturnCount = 40;
-	constexpr int Digit = Utility::GetDigit<ARRSIZE>();
+	constexpr int Digit = Utility::GetDigit(ARRSIZE);
 	
 	// Escape to InputKey == ESC
 	int InputKey = 0;
