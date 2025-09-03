@@ -1,10 +1,10 @@
 #pragma once
 #include <iostream>
 
-class myclass
+class MyClass
 {
 public:
-	myclass()
+	MyClass()
 		: ptr(nullptr)
 		, value(0)
 	{
@@ -12,7 +12,7 @@ public:
 
 		ptr = new int;
 	}
-	myclass(int _value)
+	MyClass(int _value)
 		: ptr(nullptr)
 		, value(_value)
 	{
@@ -20,7 +20,7 @@ public:
 
 		ptr = new int(_value);
 	}
-	~myclass()
+	~MyClass()
 	{
 		std::cout << "소멸자 호출" << std::endl;
 
@@ -30,14 +30,14 @@ public:
 			ptr = nullptr;
 		}
 	}
-	myclass(const myclass& _other)
+	MyClass(const MyClass& _other)
 	{
 		std::cout << "복사생성자 호출" << std::endl;
 
 		ptr = new int(*(_other.ptr));
 		value = _other.value;
 	}
-	myclass& operator=(const myclass& _other)
+	MyClass& operator=(const MyClass& _other)
 	{
 		std::cout << "복사 대입연산자 호출" << std::endl;
 
@@ -50,7 +50,7 @@ public:
 
 		return *this;
 	}
-	myclass(myclass&& _other) noexcept
+	MyClass(MyClass&& _other) noexcept
 	{
 		std::cout << "이동생성자 호출" << std::endl;
 
@@ -59,7 +59,7 @@ public:
 
 		_other.ptr = nullptr;
 	}
-	myclass& operator=(myclass&& _other) noexcept
+	MyClass& operator=(MyClass&& _other) noexcept
 	{
 		std::cout << "이동 대입연산자 호출" << std::endl;
 
@@ -79,11 +79,11 @@ public:
 
 		return *this;
 	}
-	bool operator<(const myclass& _other)
+	bool operator<(const MyClass& _other)
 	{
 		return *ptr < *(_other.ptr);
 	}
-	bool operator==(const myclass& _other)
+	bool operator==(const MyClass& _other)
 	{
 		return *ptr == *(_other.ptr);
 	}

@@ -4,6 +4,9 @@
 #include <new>
 #include <memory>
 #include <utility>
+#include <stdexcept>
+
+#include "Utility.h"
 
 // 원활한 템플릿 코드 작성을 위한 using. 나중에 주석 처리한다.
 using Type = int;
@@ -11,7 +14,7 @@ using Type = int;
 // vector를 구현해보자.
 // 커스텀 Allocator까지는 받지 않는다. 머리 아프다..
 // 템플릿이니 헤더에 다 때려박아야 한다.
-//template <typename Type>
+template <typename Type>
 class vector
 {
 public:
@@ -88,7 +91,6 @@ public:
 		new(Arr + Size) Type(_Item);
 		++Size;
 	}
-
 	// R-Value 버전 오버로드
 	void PushBack(Type&& _Item)
 	{
@@ -104,6 +106,28 @@ public:
 		++Size;
 	}
 
+	// &&로 인자'들'을 받는다.
+	template <typename... Types>
+	Type& EmplaceBack(Types&&... _Elements)
+	{
+		if (Size >= Capacity)
+		{
+			size_t NewCapacitySize = Capacity == 0 ? 1 : Capacity * 2;
+			Reserve(NewCapacitySize);
+		}
+
+		Type* NewPtr = Arr + Size;
+
+		// PushBack과 다른점. 인자를 그대로 전달받아서 아예 내부에서 직접 생성한다.
+		// perfect forwarding. 그냥 넣으면 들어올 때 &&로 받았지만, 함수에 들어오며 이름이 생겨버렸다.
+		// 그러니 함수에서 다시 &&로 전달하기 위해 완.벽.한.전.달.을 한다. == Forward를 쓴다.
+		new(NewPtr) Type(Utility::Forward<Types>(_Elements)...);
+		++Size;
+
+		// 만든 곳 위치 참조로 반환.
+		return *NewPtr;
+	}
+	// 배열 재 할당하는 함수. 내부에서도, 외부에서도 같이 쓸거다.
 	void Reserve(size_t _NewCapacity)
 	{
 		// 오버플로우 방지.
@@ -202,6 +226,7 @@ public:
 
 		// 맨 마지막꺼 하나 소멸자 호출.
 		std::destroy_at(Arr + (Size - 1));
+		--Size; // 하나 빠졌어.
 	}
 
 	// 안에 있는거 다 지워줘.
@@ -231,7 +256,15 @@ public:
 	{
 		return Capacity;
 	}
-	
+	bool IsEmpty() const noexcept
+	{
+		return Size == 0;
+	}
+	// 이런 인터페이스 있으면 좋지 않을까?
+	bool IsFull() const noexcept
+	{
+		return Size == Capacity;
+	}
 	// GetData를 오버로드 한다.
 	// const vector에서는 아래 것이 호출돼서 수정 불가능. 그냥 vector에서는 위의 것이 호출된다.
 	Type* GetData() noexcept
@@ -262,12 +295,23 @@ public:
 	Type& At(size_t _Index)
 	{
 		// 그래도 debug에서 검사 해야지.
-		assert(Size);
+		assert(_Index < Size);
+		// 너 인덱스 초과야.
+		if (_Index < Size)
+		{
+			throw std::out_of_range("At() : index out of range");
+		}
+
 		return Arr[_Index];
 	}
 	const Type& At(size_t _Index) const
 	{
-		assert(Size);
+		assert(_Index < Size);
+		if (_Index < Size)
+		{
+			throw std::out_of_range("At() const : index out of range");
+		}
+
 		return Arr[_Index];
 	}
 };

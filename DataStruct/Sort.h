@@ -50,7 +50,7 @@ namespace Sort
 		{
 			// 현재 순회하는 인덱스 위치와 값을 받아둔다.
 			size_t Iter = i;
-			Type Inst = std::move(_Arr[Iter]);
+			Type Inst = Utility::Move(_Arr[Iter]);
 
 			// (정렬 된) 이전 값과 비교해서 이전 값을 밀어냄.
 			while (Iter > 0 && _Comp(Inst, _Arr[Iter - 1]))
@@ -60,7 +60,7 @@ namespace Sort
 			}
 
 			// 적절한 위치에 이동.
-			_Arr[Iter] = std::move(Inst);
+			_Arr[Iter] = Utility::Move(Inst);
 		}
 	}
 	template <typename Type>

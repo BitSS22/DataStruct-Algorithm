@@ -1,7 +1,9 @@
-// std Library
+// std Test
 #include <vector>
 #include <list>
 #include <map>
+
+#include <utility>
 
 // Memory Leak Check
 #include <crtdbg.h>
@@ -37,24 +39,17 @@ int main()
 	// Memory Leak Check
 	_CrtSetDbgFlag(_CRTDBG_LEAK_CHECK_DF | _CRTDBG_ALLOC_MEM_DF);
 
-	std::vector<int> vv = {};
-	vv.pop_back();
+	vector<MyClass> v = {};
 
-	vector v = {};
-
-	vv[3];
-	vv.at(3);
-	
+	v.Reserve(10);
 	for (size_t i = 0; i < 10; ++i)
 	{
-		v.PushBack(i);
+		v.EmplaceBack(i);
 	}
 
-	for (size_t i = 0; i < v.GetSize(); ++i)
-	{
-		std::cout << v.GetData()[i] << " ";
-	}
-	
+	for (size_t i = 0; i < 10; ++i)
+		std::cout << v[i].GetValue() << " ";
+
 	SortTest();
 }
 
@@ -63,7 +58,7 @@ void SortTest()
 	// Arr Option
 	constexpr size_t ARRSIZE = 11;
 	constexpr size_t CarriageReturnCount = 40;
-	constexpr int Digit = Utility::GetDigit(ARRSIZE);
+	constexpr size_t Digit = Utility::GetPrintDigit(ARRSIZE);
 	
 	// Escape to InputKey == ESC
 	int InputKey = 0;
