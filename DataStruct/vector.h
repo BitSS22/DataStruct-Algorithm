@@ -21,11 +21,8 @@ public:
 		// Arr이 nullptr이 아니면 메모리 해제.
 		if (nullptr != Arr)
 		{
-			// 소멸자 호출 해줘.
-			for (size_t i = 0; i < Size; ++i)
-			{
-				std::destroy_at(Arr + i);
-			}
+			// 안에 메모리 지워줘.
+			Clear();
 
 			// 메모리 해제 해줘.
 			if constexpr (alignof(Type) > alignof(std::max_align_t))
@@ -39,7 +36,6 @@ public:
 
 			// 초기 값으로 밀어버리기.
 			Arr = nullptr;
-			Size = 0;
 			Capacity = 0;
 		}
 	}
@@ -124,13 +120,44 @@ public:
 			NewArr = static_cast<Type*>(::operator new(sizeof(Type) * _NewCapacity));
 		}
 		
-		// 기존 Arr의 요소를 이동시킨다.
-		for (size_t i = 0; i < Size; ++i)
+		// 지금까지 몇개 옮겼니?
+		size_t i = 0;
+		try
 		{
-			// 저쪽 위치에 생성해줘. 이동 생성자 있으면 호출해줘. noexcept일때만.
-			new(NewArr + i) Type(std::move_if_noexcept(Arr[i]));
+			while (i < Size)
+			{
+				// 새로운 위치로 이동 (R-Value가 noexcept가 아니라면 copy)
+				new(NewArr + i) Type(std::move_if_noexcept(Arr[i]));
+				++i;
+			}
+		}
+		catch (...) // 복사 중 예외 발생!
+		{
+			// 복사된거 다시 다 지워
+			for (size_t j = 0; j < i; ++j)
+			{
+				std::destroy_at(NewArr + j);
+			}
+			
+			// 새로 할당한 메모리도 지워.
+			if constexpr (alignof(Type) > alignof(std::max_align_t))
+			{
+				::operator delete(NewArr, std::align_val_t(alignof(Type)));
+			}
+			else
+			{
+				::operator delete(NewArr);
+			}
+
+			// 예외 위로 던져줘.
+			throw;
+		}
+
+		// 여기 왔으면 예외 없음.
+		for (size_t j = 0; j < Size; ++j)
+		{
 			// 기존 배열의 요소들의 소멸자 호출시켜서 정리한다.
-			std::destroy_at(Arr + i);
+			std::destroy_at(Arr + j);
 		}
 
 		// Arr 메모리 반환.
@@ -147,6 +174,19 @@ public:
 		// 배열 주소와 Capacity 갱신.
 		Arr = NewArr;
 		Capacity = _NewCapacity;
+	}
+
+	// 안에 있는거 다 지워줘.
+	void Clear() noexcept
+	{
+		// 소멸자 호출 해줘.
+		for (size_t i = 0; i < Size; ++i)
+		{
+			std::destroy_at(Arr + i);
+		}
+
+		// 할당 된 메모리는 그대로.
+		Size = 0;
 	}
 
 private:
