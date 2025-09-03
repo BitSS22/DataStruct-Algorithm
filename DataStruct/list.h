@@ -1,194 +1,69 @@
 #pragma once
 #include <assert.h>
 
-#define INNER_CLASS
+// 마찬가지로 원활한 템플릿 작성을 위한 별칭.
+using Type = int;
 
-//using T = float;
+// 리스트 구현한다. 노드 형식으로 서로를 연결해서 알고 있는 자료구조.
+// 순회 등에서 최적화의 여지를 생각해 본다면 한번 크기를 할당할때, 몇개 정도 분량의 적절한 사이즈를 땡겨서 미리 할당하고,
+// 그 자리에 생성한다면 캐시 적중률이나 속도면에서 더 이득을 볼 수도 있지 않을까.
 
-
-template <typename T>
-class MyList
+//template<typename Type>
+class list
 {
-public:
-	INNER_CLASS class MyNode;
-	INNER_CLASS class Iterator;
-public:
-	MyList()
-		: DataSize(0)
-		, HeadNode(nullptr)
-		, TailNode(nullptr)
-	{
-		HeadNode = new MyNode({});
-		TailNode = new MyNode({});
-		HeadNode->NextNode = TailNode;
-		TailNode->PrevNode = HeadNode;
-	}
-	~MyList()
-	{
-		Clear();
-		delete HeadNode;
-		delete TailNode;
-	}
-
 private:
-	size_t DataSize;
-	MyNode* HeadNode;
-	MyNode* TailNode;
-
-public:
-	void Clear()
+	// list는 노드 형식이고, 외부에 그걸 알려줄 필요는 없다.
+	// 그래서 inner class로 Node를 만든다.
+	class node
 	{
-		MyNode* DeleteNode = HeadNode->NextNode;
-
-		while (DeleteNode != TailNode)
+	private:
+		node() {}
+		~node()
 		{
-			MyNode* TempNode = DeleteNode;
-			DeleteNode = TempNode->NextNode;
-			delete TempNode;
+			// 메모리를 0으로 밀고 퇴장.
+			Prev = nullptr;
+			Next = nullptr;
 		}
 
-		HeadNode->NextNode = TailNode;
-		TailNode->PrevNode = HeadNode;
-		DataSize = 0;
-	}
-	void push_back(const T& _data)
-	{
-		MyNode* InsertNode = new MyNode(_data);
-		MyNode* BackNode = TailNode->PrevNode;
-
-		BackNode->NextNode = InsertNode;
-		TailNode->PrevNode = InsertNode;
-
-		InsertNode->NextNode = TailNode;
-		InsertNode->PrevNode = BackNode;
-
-		++DataSize;
-	}
-	void push_front(const T& _data)
-	{
-		MyNode* InsertNode = new MyNode(_data);
-		MyNode* FrontNode = HeadNode->NextNode;
-
-		FrontNode->PrevNode = InsertNode;
-		HeadNode->NextNode = InsertNode;
-
-		InsertNode->NextNode = FrontNode;
-		InsertNode->PrevNode = HeadNode;
-
-		++DataSize;
-	}
-
-	size_t size() const
-	{
-		return DataSize;
-	}
-
-	Iterator begin()
-	{
-		return Iterator(this, HeadNode->NextNode);
-	}
-
-	Iterator End()
-	{
-		return Iterator(this, TailNode);
-	}
-
-	Iterator erase(Iterator _iterator)
-	{
-		if (_iterator.Indicate == nullptr || _iterator.Owner == nullptr || _iterator.Indicate == _iterator.Owner->HeadNode || _iterator.Indicate == _iterator.Owner->TailNode)
-			assert(nullptr);
-
-		MyNode* prev = _iterator.Indicate->PrevNode;
-		MyNode* next = _iterator.Indicate->NextNode;
-		
-		prev->NextNode = next;
-		next->PrevNode = prev;
-
-		delete _iterator.Indicate;
-		--DataSize;
-
-		return Iterator(_iterator.Owner, next);
-	}
-
-public:
-	INNER_CLASS
-	class Iterator
-	{
-		friend class MyList;
-	public:
-		Iterator(MyList* _list, MyNode* _node)
-			: Owner(_list)
-			, Indicate(_node)
-		{}
+		// 코드 작성중에 내가 원하지 않는 복사나 이동을 확인하기 위해서.
+		node(const node& _Other) = delete;
+		node(node&& _Other) = delete;
+		node& operator= (const node& _Other) = delete;
+		node& operator= (node&& _Other) = delete;
 
 	private:
-		MyList* Owner;
-		MyNode* Indicate;
+		// 이전 노드, 다음 노드를 가진다.
+		// 그리고 저장할 데이터도 가진다.
+		node* Prev = nullptr;
+		node* Next = nullptr;
+		Type Data = {};
 
-	public:
-		Iterator& operator=(const Iterator& _other)
+	private:
+		// Prev와 Next로 양 node를 연결해주는 함수 두개.
+		// 인자 nullpt 들어오면 터진다. nullptr 체크 하고 써라.
+		// 내부에서 쓸 함수니 위험해도 괜찮다. 내가 알아서 쓴다.
+		void LinkPrev(node* _Prev)
 		{
-			Owner = _other.Owner;
-			Indicate = _other.Indicate;
+			_Prev->Next = this;
+			Prev = _Prev;
 		}
-		bool operator==(const Iterator& _other)
+		void LinkNext(node* _Next)
 		{
-			if (Owner == _other.Owner && Indicate == _other.Indicate)
-				return true;
-			return false;
+			_Next->Prev = this;
+			Next = _Next;
 		}
-		bool operator!=(const Iterator& _other)
-		{
-			return !(*this == _other);
-		}
-		T& operator*()
-		{
-			return Indicate->Data;
-		}
-		Iterator& operator++()
-		{
-			if (Indicate == Owner->TailNode)
-				assert(nullptr);
-			Indicate = Indicate->NextNode;
-			return *this;
-		}
-		Iterator operator++(int)
-		{
-			Iterator Temp = *this;
-			++(*this);
-			return Temp;
-		}
-		Iterator& operator--()
-		{
-			if (Indicate == Owner->HeadNode->NextNode)
-				assert(nullptr);
 
-			Indicate = Indicate->PrevNode;
-			return *this;
-		}
-		Iterator operator--(int)
-		{
-			Iterator Temp = *this;
-			--(*this);
-			return Temp;
-		}
 	};
 
-private:
-	INNER_CLASS
-	class MyNode
-	{
-		friend class MyList;
-	private:
-		MyNode(T _data)
-			: Data(_data)
-			, PrevNode(nullptr)
-			, NextNode(nullptr)
-		{}
+public:
+	list() {}
+	~list() {}
 
-	private:
-		T Data;
-		MyNode* PrevNode;
-		MyNode* NextNode;
-	};
+	// 코드 작성중에 내가 원하지 않는 복사나 이동을 확인하기 위해서.
+	list(const list& _Other) = delete;
+	list(list&& _Other) = delete;
+
+public:
+	list& operator= (const list& _Other) = delete;
+	list& operator= (list&& _Other) = delete;
 };
