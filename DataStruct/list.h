@@ -23,15 +23,22 @@ private:
 	private:
 		// 칭구
 		friend class list;
-		node() {}
+		node(){}
 		// 편하게 쓰고 싶으니까 생성자 오버로딩.
-		node(const Type& _Data)
-			: Data(_Data) {
-		}
+		node(const Type& _Item)
+			: Data(_Item) {}
 		// R-Value도 만들어 둔다. 인자로 들어오면서 이름 생겼으니 Move로 R-Value Cast.
-		node(Type&& _Data) noexcept
-			: Data(Utility::Move(_Data)) {
-		}
+		node(Type&& _Item) noexcept
+			: Data(Utility::Move(_Item)) {}
+
+		// list.Emplace를 위한 node 생성자.
+		// explicit == 암시적 형번환 (타입 추론)하지 마라.
+		struct EmplaceTag {};
+		// Tag용 구조체. 내부에서 쓰지도 않을거, 이름도 지을 필요 없다.
+		template <typename... Types>
+		explicit node(EmplaceTag, Types&&... _Items) noexcept
+			: Data(Utility::Forward(_Items)...) {}
+
 		~node()
 		{
 			// 메모리를 0으로 밀고 퇴장.
@@ -165,7 +172,8 @@ public:
 	Type& EmplaceBack(Types&&... _Item)
 	{
 		// 새로 만들어줘 -> 인자 그대로 전달해서.
-		node* NewNode = new node(Utility::Forward<Types>(_Item)...);
+		// node::EmplaceTag가 Type인지 값인지 template에서 알 수 없으니 typename을 붙인다. 아니면 node::EmplaceTag()를 쓰던가.
+		node* NewNode = new node(typename node::EmplaceTag, Utility::Forward<Types>(_Item)...);
 
 		// 비어있니?
 		if (IsEmpty())
@@ -222,7 +230,7 @@ public:
 	template <typename... Types>
 	Type& EmplaceFront(Types&&... _Item)
 	{
-		node* NewNode = new node(Utility::Forward<Types>(_Item)...);
+		node* NewNode = new node(typename node::EmplaceTag, Utility::Forward<Types>(_Item)...);
 
 		if (IsEmpty())
 		{
