@@ -36,8 +36,8 @@ private:
 		struct EmplaceTag {};
 		// Tag용 구조체. 내부에서 쓰지도 않을거, 이름도 지을 필요 없다.
 		template <typename... Types>
-		explicit node(EmplaceTag, Types&&... _Items) noexcept
-			: Data(Utility::Forward(_Items)...) {}
+		explicit node(EmplaceTag, Types&&... _Items)
+			: Data(Utility::Forward<Types>(_Items)...) {}
 
 		~node()
 		{
@@ -147,7 +147,7 @@ public:
 	// R-Value Version
 	void PushBack(Type&& _Item)
 	{
-		// noexcept 아닐때만 이동시켜줘.
+		// noexcept 일때만 이동시켜줘.
 		node* NewNode = new node(std::move_if_noexcept(_Item));
 
 		// 비어있니?
@@ -172,8 +172,8 @@ public:
 	Type& EmplaceBack(Types&&... _Item)
 	{
 		// 새로 만들어줘 -> 인자 그대로 전달해서.
-		// node::EmplaceTag가 Type인지 값인지 template에서 알 수 없으니 typename을 붙인다. 아니면 node::EmplaceTag()를 쓰던가.
-		node* NewNode = new node(typename node::EmplaceTag, Utility::Forward<Types>(_Item)...);
+		// node::EmplaceTag 빈 객체 하나 Tag로 쓴다.
+		node* NewNode = new node(node::EmplaceTag(), Utility::Forward<Types>(_Item)...);
 
 		// 비어있니?
 		if (IsEmpty())
@@ -230,7 +230,7 @@ public:
 	template <typename... Types>
 	Type& EmplaceFront(Types&&... _Item)
 	{
-		node* NewNode = new node(typename node::EmplaceTag, Utility::Forward<Types>(_Item)...);
+		node* NewNode = new node(node::EmplaceTag(), Utility::Forward<Types>(_Item)...);
 
 		if (IsEmpty())
 		{
