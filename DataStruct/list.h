@@ -1,5 +1,7 @@
 #pragma once
 #include <assert.h>
+#include <utility>
+#include <memory>
 
 #include "Utility.h"
 
@@ -24,10 +26,12 @@ private:
 		node() {}
 		// 편하게 쓰고 싶으니까 생성자 오버로딩.
 		node(const Type& _Data)
-			: Data(_Data) {}
+			: Data(_Data) {
+		}
 		// R-Value도 만들어 둔다. 인자로 들어오면서 이름 생겼으니 Move로 R-Value Cast.
 		node(Type&& _Data) noexcept
-			: Data(Utility::Move(_Data)) {}
+			: Data(Utility::Move(_Data)) {
+		}
 		~node()
 		{
 			// 메모리를 0으로 밀고 퇴장.
@@ -52,7 +56,7 @@ private:
 
 	private:
 		// Prev와 Next로 양 node를 연결해주는 함수.
-		// 인자 nullpt 들어오면 터진다. nullptr 체크 하고 써라.
+		// 인자 nullptr 들어오면 터진다. nullptr 체크 하고 써라.
 		// 내부에서 쓸 함수니 위험해도 괜찮다. 내가 알아서 쓴다.
 		// 그냥 두개 연결할거니 static으로 만들면 뭐 연결하던 쓸 수 있겠지.
 		static void Connect(node* _Prev, node* _Next) noexcept
@@ -88,8 +92,11 @@ private:
 
 public:
 	list() {}
-	// TODO. 데이터 정리하는 내용 소멸자에 넣어라.
-	~list() {}
+	~list()
+	{
+		// 너 가기 전에 싹 밀어줘.
+		Clear();
+	}
 
 	// 코드 작성중에 내가 원하지 않는 복사나 이동을 확인하기 위해서.
 	list(const list& _Other) = delete;
@@ -130,6 +137,178 @@ public:
 		++Size;
 	}
 
+	// R-Value Version
+	void PushBack(Type&& _Item)
+	{
+		// noexcept 아닐때만 이동시켜줘.
+		node* NewNode = new node(std::move_if_noexcept(_Item));
+
+		// 비어있니?
+		if (IsEmpty())
+		{
+			// 비어있으면 Head, Tail이 nullptr. 그러니 Head, Tail만 이 노드로 연결해주고 끝난다.
+			Head = NewNode;
+		}
+		else
+		{
+			// 안 비어있다면 Tail에 무슨 노드가 있을것이다.
+			// 두개 연결해 준다.
+			node::Connect(Tail, NewNode);
+		}
+
+		// 맨 끝에 오니 어차피 해야 한다.
+		Tail = NewNode;
+		++Size;
+	}
+
+	template <typename... Types>
+	Type& EmplaceBack(Types&&... _Item)
+	{
+		// 새로 만들어줘 -> 인자 그대로 전달해서.
+		node* NewNode = new node(Utility::Forward<Types>(_Item)...);
+
+		// 비어있니?
+		if (IsEmpty())
+		{
+			Head = NewNode;
+		}
+		else
+		{
+			node::Connect(Tail, NewNode);
+		}
+
+		Tail = NewNode;
+		++Size;
+
+		// Data의 참조 반환.
+		return NewNode->Data;
+	}
+
+	// PushFront는 Head, Tail만 바꿔주면 된다.
+	void PushFront(const Type& _Item)
+	{
+		node* NewNode = new node(_Item);
+
+		if (IsEmpty())
+		{
+			Tail = NewNode;
+		}
+		else
+		{
+			node::Connect(NewNode, Head);
+		}
+
+		Head = NewNode;
+		++Size;
+	}
+
+	void PushFront(Type&& _Item)
+	{
+		node* NewNode = new node(std::move_if_noexcept(_Item));
+
+		if (IsEmpty())
+		{
+			Tail = NewNode;
+		}
+		else
+		{
+			node::Connect(NewNode, Head);
+		}
+
+		Head = NewNode;
+		++Size;
+	}
+
+	template <typename... Types>
+	Type& EmplaceFront(Types&&... _Item)
+	{
+		node* NewNode = new node(Utility::Forward<Types>(_Item)...);
+
+		if (IsEmpty())
+		{
+			Tail = NewNode;
+		}
+		else
+		{
+			node::Connect(NewNode, Head);
+		}
+
+		Head = NewNode;
+		++Size;
+
+		return NewNode->Data;
+	}
+
+	// 맨 뒤에꺼 하나 빼줘.
+	void PopBack()
+	{
+		// size 0이면 그냥 죽어.
+		assert(Size);
+
+		// Tail 노드를 지울거다.
+		node* DeleteNode = Tail;
+		Tail = Tail->Prev;
+		// 연결 끊어줘.
+		node::Detach(DeleteNode);
+
+		// 이제 죽어.
+		delete DeleteNode;
+
+		--Size;
+
+		// Size가 0이 됐다면?
+		if (IsEmpty())
+		{
+			// 이거 안하면 Tail Node == nullptr; Size == 0; 인데 Head만 지워진 어딘가를 가리킬것.
+			Head = nullptr;
+		}
+	}
+
+	// PopFront는 PopBack의 반대.
+	void PopFront()
+	{
+		assert(Size);
+
+		node* DeleteNode = Head;
+		Head = Head->Next;
+		node::Detach(DeleteNode);
+		delete DeleteNode;
+
+		--Size;
+
+		if (IsEmpty())
+		{
+			Tail = nullptr;
+		}
+	}
+
+	// 모든 node를 찾으면서 순회해야 한다.
+	void Clear() noexcept
+	{
+		// 비어 있으면 할 일도 없다.
+		// 체크하지 않아도 Head == nullptr일테니 동작에 문제는 없다.
+		if (IsEmpty())
+			return;
+
+		// 맨 처음부터 돌겠다.
+		node* CurrentNode = Head;
+
+		// Head == nullptr이라면 끝까지 왔다는 뜻.
+		while (nullptr != CurrentNode)
+		{
+			// 다음 노드의 주소를 미리 받는다.
+			node* NextNode = CurrentNode->Next;
+			// 지워줘. 지운 다음에 Next를 참조하면 당연히 터진다.
+			delete CurrentNode;
+			// 받아둔 노드 주소로 갱신.
+			CurrentNode = NextNode;
+		}
+
+		// 다 지웠어? 데이터 깔끔하게 밀어줘.
+		Head = nullptr;
+		Tail = nullptr;
+		Size = 0;
+	}
 
 public:
 	// 이미 구현한 vector에서 가져와야겠다. 어차피 거기서 거긴데.
