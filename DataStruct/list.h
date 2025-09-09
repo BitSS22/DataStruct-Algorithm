@@ -34,6 +34,7 @@ class list
 
 public:
 	// Iterator도 구현해본다.
+	// ifdef로 디버깅 처리를 분기해서, 릴리즈 빌드시 오버헤드 없이 단순한 포인터처럼 작동.
 	class Iterator
 	{
 		friend class list;
@@ -351,7 +352,8 @@ public:
 		return Iterator(NewNode);
 #endif
 	}
-
+	
+	// 지운 다음 노드를 반환.
 	Iterator Erase(Iterator _Start, Iterator _End) noexcept
 	{
 #ifdef _DEBUG
