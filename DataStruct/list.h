@@ -1,111 +1,147 @@
 #pragma once
 #include <assert.h>
-#include <utility>
-#include <memory>
 
 #include "Utility.h"
 
-// 마찬가지로 원활한 템플릿 작성을 위한 별칭.
 using Type = int;
 
-// 리스트 구현한다. 노드 형식으로 서로를 연결해서 알고 있는 자료구조.
-// 순회 등에서 최적화의 여지를 생각해 본다면 한번 크기를 할당할때, 몇개 정도 분량의 적절한 사이즈를 땡겨서 미리 할당하고,
-// 그 자리에 생성한다면 캐시 적중률이나 속도면에서 더 이득을 볼 수도 있지 않을까.
-
-//template<typename Type>
+// template<typename Type>
 class list
 {
-private:
-	// list는 노드 형식이고, 외부에 그걸 알려줄 필요는 없다.
-	// 그래서 inner class로 Node를 만든다.
-	class node
+	// 이전 노드, 다음 노드, 값을 가진 구조체.
+	// 외부에서 이런 구조체의 존재를 알 필요 없다. 이너클래스.
+	struct Node
 	{
-	private:
-		// 칭구
+		struct R_Value_Flag{};
+
 		friend class list;
-		node(){}
-		// 편하게 쓰고 싶으니까 생성자 오버로딩.
-		node(const Type& _Item)
+	private:
+		Node() {}
+		Node(const Type& _Item)
 			: Data(_Item) {}
-		// R-Value도 만들어 둔다. 인자로 들어오면서 이름 생겼으니 Move로 R-Value Cast.
-		node(Type&& _Item) noexcept
+		Node(const Type& _Item)
+			: Data(_Item) {}
+		// 명시적으로 R-Value 생성자 호출.
+		Node(R_Value_Flag, Type&& _Item)
 			: Data(Utility::Move(_Item)) {}
 
-		// list.Emplace를 위한 node 생성자.
-		// explicit == 암시적 형번환 (타입 추론)하지 마라.
-		struct EmplaceTag {};
-		// Tag용 구조체. 내부에서 쓰지도 않을거, 이름도 지을 필요 없다.
-		template <typename... Types>
-		explicit node(EmplaceTag, Types&&... _Items)
-			: Data(Utility::Forward<Types>(_Items)...) {}
-
-		~node()
-		{
-			// 메모리를 0으로 밀고 퇴장.
-			Prev = nullptr;
-			Next = nullptr;
-		}
-
-		// 코드 작성중에 내가 원하지 않는 복사나 이동을 확인하기 위해서.
-		node(const node& _Other) = delete;
-		node(node&& _Other) = delete;
-		node& operator= (const node& _Other) = delete;
-		node& operator= (node&& _Other) = delete;
-
-	private:
-		// 이전 노드, 다음 노드를 가진다.
-		// 그리고 저장할 데이터도 가진다.
-		// 만약 Size == 0 일때도 Prev, Next에 DummyNode를 생성한다면
-		// 연결, 제거 등에서 if (node != nullptr) 같은 조건식이 필요 없을 것.
-		node* Prev = nullptr;
-		node* Next = nullptr;
+		Node* Prev = nullptr;
+		Node* Next= nullptr;
 		Type Data = {};
-
-	private:
-		// Prev와 Next로 양 node를 연결해주는 함수.
-		// 인자 nullptr 들어오면 터진다. nullptr 체크 하고 써라.
-		// 내부에서 쓸 함수니 위험해도 괜찮다. 내가 알아서 쓴다.
-		// 그냥 두개 연결할거니 static으로 만들면 뭐 연결하던 쓸 수 있겠지.
-		static void Connect(node* _Prev, node* _Next) noexcept
-		{
-			assert(_Prev && _Next);
-			_Prev->Next = _Next;
-			_Next->Prev = _Prev;
-		}
-
-		// 이 노드 깔끔하게 떼줘.
-		// 당연히 nullptr 들어오면 터진다.
-		// 중간 노드만 떼니, Head, Tail node일 때는 따로 연결 처리 해라.
-		static void Detach(node* _DetachNode) noexcept
-		{
-			assert(_DetachNode);
-			node* PrevNode = _DetachNode->Prev;
-			node* NextNode = _DetachNode->Next;
-
-			if (nullptr != PrevNode)
-			{
-				PrevNode->Next = NextNode;
-			}
-			if (nullptr != NextNode)
-			{
-				NextNode->Prev = PrevNode;
-			}
-
-			_DetachNode->Prev = nullptr;
-			_DetachNode->Next = nullptr;
-		}
 
 	};
 
+	// Iterator도 구현해본다.
+	class Iterator
+	{
+	public:
+		Iterator() {}
+#ifdef _DEBUG
+		Iterator(Node* _Node, const list* _Owner)
+			: ptr(_Node)
+			, Owner(_Owner)
+			, FixLevel(_Owner->FixLevel){}
+#else
+		Iterator(Node* _Node)
+			: ptr(_Node) {}
+#endif
+		~Iterator() {}
+
+		Iterator(const Iterator& _Other) = default;
+		Iterator(Iterator&& _Other) = default;
+
+	public:
+		Iterator& operator= (const Iterator& _Other) = default;
+		Iterator& operator= (Iterator&& _Other) = default;
+
+		// 결국 iterator 구현에서 중요한건 operator?
+		Type& operator*() noexcept
+		{
+#ifdef  _DEBUG
+			DereferenceInvalidCheck();
+#endif
+			return ptr->Data;
+		}
+
+		bool operator== (Iterator _Other) const noexcept
+		{
+			return ptr == _Other.ptr;
+		}
+		bool operator!= (Iterator _Other) const noexcept
+		{
+			return !(*this == _Other);
+		}
+		Iterator& operator++()
+		{
+#ifdef _DEBUG
+			DereferenceInvalidCheck();
+#endif
+			ptr = ptr->Next;
+			return *this;
+		}
+		Iterator operator++(int)
+		{
+#ifdef _DEBUG
+			DereferenceInvalidCheck();
+#endif
+			Iterator RetrunIter = *this;
+			ptr = ptr->Next;
+			return RetrunIter;
+		}
+
+	private:
+		Node* ptr = nullptr;
+		// Debug 빌드일때는 Iterator의 유효성을 검사할 것.
+#ifdef _DEBUG
+		const list* Owner = nullptr;
+		size_t FixLevel = 0;
+#endif
+#ifdef _DEBUG
+	private:
+		void BasicInvalidCheck()
+		{
+			// 주인이 nullptr이니?
+			assert(Owner);
+			// 주인이 이동, 복사, 등으로 바뀌었니?
+			assert(Owner->Dummy);
+			// 변경 된 list니?
+			assert(FixLevel == Owner->FixLevel);
+		}
+		void DereferenceInvalidCheck()
+		{
+			BasicInvalidCheck();
+
+			// ptr이 nullptr이니?
+			assert(ptr);
+			// 현재 가리키는게 더미노드니?
+			assert(ptr != Owner->Dummy);
+		}
+#endif
+	};
+
 public:
-	list() {}
+	// Sentinel List를 만들거다. 더미 노드를 하나 두고 코드의 분기처리를 줄이고 통일성을 높인다.
+	// Dummy Node를 하나를 두고 원형으로 이어진 구조로 만든다.
+	list()
+	{
+		// 더미 노드를 만들고, 자기 자신을 가르키게 만든다.
+		Dummy = new Node();
+		Dummy->Prev = Dummy;
+		Dummy->Next = Dummy;
+	}
 	~list()
 	{
-		// 너 가기 전에 싹 밀어줘.
+		// 있는 노드 싹다 지운다.
 		Clear();
+
+		// 더미 노드도 삭제한다.
+		if (Dummy != nullptr)
+		{
+			delete Dummy;
+			Dummy = nullptr;
+		}
 	}
 
-	// 코드 작성중에 내가 원하지 않는 복사나 이동을 확인하기 위해서.
 	list(const list& _Other) = delete;
 	list(list&& _Other) = delete;
 
@@ -114,241 +150,169 @@ public:
 	list& operator= (list&& _Other) = delete;
 
 private:
-	// list는 뭘 가져야 할까. 양 끝의 노드와 size를 기억하자.
-	node* Head = nullptr;
-	node* Tail = nullptr;
+	Node* Dummy = nullptr;
 	size_t Size = 0;
+#ifdef _DEBUG
+	size_t FixLevel = 0;
+#endif
 
 public:
-	// 맨 끝에 넣자.
 	void PushBack(const Type& _Item)
 	{
-		// 일단 새로운 노드 하나 만들자.
-		node* NewNode = new node(_Item);
+		Node* NewNode = new Node(_Item);
 
-		// 비어있니?
-		if (IsEmpty())
-		{
-			// 비어있으면 Head, Tail이 nullptr. 그러니 Head, Tail만 이 노드로 연결해주고 끝난다.
-			Head = NewNode;
-		}
-		else
-		{
-			// 안 비어있다면 Tail에 무슨 노드가 있을것이다.
-			// 두개 연결해 준다.
-			node::Connect(Tail, NewNode);
-		}
+		// Dummy.Prev는 Tail.
+		// 이전 PrevNode를 받아둔다.
+		Node* Prev = Dummy->Prev;
+		Prev->Next = NewNode;
+		Dummy->Prev = NewNode;
 
-		// 맨 끝에 오니 어차피 해야 한다.
-		Tail = NewNode;
+		NewNode->Prev = Prev;
+		NewNode->Next = Dummy;
+
 		++Size;
+#ifdef _DEBUG
+		++FixLevel;
+#endif
 	}
-
-	// R-Value Version
 	void PushBack(Type&& _Item)
 	{
-		// noexcept 일때만 이동시켜줘.
-		node* NewNode = new node(std::move_if_noexcept(_Item));
+		Node* NewNode = new Node(Node::R_Value_Flag(), Utility::Forward<Type>(_Item));
 
-		// 비어있니?
-		if (IsEmpty())
-		{
-			// 비어있으면 Head, Tail이 nullptr. 그러니 Head, Tail만 이 노드로 연결해주고 끝난다.
-			Head = NewNode;
-		}
-		else
-		{
-			// 안 비어있다면 Tail에 무슨 노드가 있을것이다.
-			// 두개 연결해 준다.
-			node::Connect(Tail, NewNode);
-		}
+		Node* Prev = Dummy->Prev;
+		Prev->Next = NewNode;
+		Dummy->Prev = NewNode;
 
-		// 맨 끝에 오니 어차피 해야 한다.
-		Tail = NewNode;
+		NewNode->Prev = Prev;
+		NewNode->Next = Dummy;
+
 		++Size;
+#ifdef _DEBUG
+		++FixLevel;
+#endif
 	}
 
-	template <typename... Types>
-	Type& EmplaceBack(Types&&... _Item)
-	{
-		// 새로 만들어줘 -> 인자 그대로 전달해서.
-		// node::EmplaceTag 빈 객체 하나 Tag로 쓴다.
-		node* NewNode = new node(node::EmplaceTag(), Utility::Forward<Types>(_Item)...);
-
-		// 비어있니?
-		if (IsEmpty())
-		{
-			Head = NewNode;
-		}
-		else
-		{
-			node::Connect(Tail, NewNode);
-		}
-
-		Tail = NewNode;
-		++Size;
-
-		// Data의 참조 반환.
-		return NewNode->Data;
-	}
-
-	// PushFront는 Head, Tail만 바꿔주면 된다.
 	void PushFront(const Type& _Item)
 	{
-		node* NewNode = new node(_Item);
+		Node* NewNode = new Node(_Item);
 
-		if (IsEmpty())
-		{
-			Tail = NewNode;
-		}
-		else
-		{
-			node::Connect(NewNode, Head);
-		}
+		Node* Next = Dummy->Next;
+		Next->Prev = NewNode;
+		Dummy->Next = NewNode;
 
-		Head = NewNode;
+		NewNode->Prev = Dummy;
+		NewNode->Next = Next;
+
 		++Size;
+#ifdef _DEBUG
+		++FixLevel;
+#endif
 	}
-
 	void PushFront(Type&& _Item)
 	{
-		node* NewNode = new node(std::move_if_noexcept(_Item));
+		Node* NewNode = new Node(Node::R_Value_Flag(), Utility::Forward<Type>(_Item));
 
-		if (IsEmpty())
-		{
-			Tail = NewNode;
-		}
-		else
-		{
-			node::Connect(NewNode, Head);
-		}
+		Node* Next = Dummy->Next;
+		Next->Prev = NewNode;
+		Dummy->Next = NewNode;
 
-		Head = NewNode;
+		NewNode->Prev = Dummy;
+		NewNode->Next = Next;
+
 		++Size;
+#ifdef _DEBUG
+		++FixLevel;
+#endif
 	}
 
-	template <typename... Types>
-	Type& EmplaceFront(Types&&... _Item)
-	{
-		node* NewNode = new node(node::EmplaceTag(), Utility::Forward<Types>(_Item)...);
-
-		if (IsEmpty())
-		{
-			Tail = NewNode;
-		}
-		else
-		{
-			node::Connect(NewNode, Head);
-		}
-
-		Head = NewNode;
-		++Size;
-
-		return NewNode->Data;
-	}
-
-	// 맨 뒤에꺼 하나 빼줘.
 	void PopBack()
 	{
-		// size 0이면 그냥 죽어.
-		assert(Size);
+		assert(Dummy->Prev != Dummy);
 
-		// Tail 노드를 지울거다.
-		node* DeleteNode = Tail;
-		Tail = Tail->Prev;
-		// 연결 끊어줘.
-		node::Detach(DeleteNode);
+		Node* DeleteNode = Dummy->Prev;
+		DeleteNode->Prev->Next = Dummy;
+		Dummy->Prev = DeleteNode->Prev;
 
-		// 이제 죽어.
+		// 디버깅을 위한 값 밀어버리기.
+		DeleteNode->Prev = nullptr;
+		DeleteNode->Next = nullptr;
+
 		delete DeleteNode;
 
 		--Size;
-
-		// Size가 0이 됐다면?
-		if (IsEmpty())
-		{
-			// 이거 안하면 Tail Node == nullptr; Size == 0; 인데 Head만 지워진 어딘가를 가리킬것.
-			Head = nullptr;
-		}
+#ifdef _DEBUG
+		++FixLevel;
+#endif
 	}
 
-	// PopFront는 PopBack의 반대.
 	void PopFront()
 	{
-		assert(Size);
+		assert(Dummy->Next != Dummy);
 
-		node* DeleteNode = Head;
-		Head = Head->Next;
-		node::Detach(DeleteNode);
+		Node* DeleteNode = Dummy->Next;
+		DeleteNode->Next->Prev = Dummy;
+		Dummy->Next = DeleteNode->Next;
+
+		DeleteNode->Prev = nullptr;
+		DeleteNode->Next = nullptr;
+
 		delete DeleteNode;
 
 		--Size;
-
-		if (IsEmpty())
-		{
-			Tail = nullptr;
-		}
+#ifdef _DEBUG
+		++FixLevel;
+#endif
 	}
 
-	// 모든 node를 찾으면서 순회해야 한다.
-	void Clear() noexcept
+	void Clear()
 	{
-		// 비어 있으면 할 일도 없다.
-		// 체크하지 않아도 Head == nullptr일테니 동작에 문제는 없다.
-		if (IsEmpty())
-			return;
-
-		// 맨 처음부터 돌겠다.
-		node* CurrentNode = Head;
-
-		// Head == nullptr이라면 끝까지 왔다는 뜻.
-		while (nullptr != CurrentNode)
+		Node* CurNode = Dummy->Next;
+		while (CurNode != Dummy)
 		{
-			// 다음 노드의 주소를 미리 받는다.
-			node* NextNode = CurrentNode->Next;
-			// 지워줘. 지운 다음에 Next를 참조하면 당연히 터진다.
-			delete CurrentNode;
-			// 받아둔 노드 주소로 갱신.
-			CurrentNode = NextNode;
+			Node* DeleteNode = CurNode;
+			CurNode = CurNode->Next;
+			delete DeleteNode;
 		}
 
-		// 다 지웠어? 데이터 깔끔하게 밀어줘.
-		Head = nullptr;
-		Tail = nullptr;
+		// 기본 값으로 초기화 해준다.
+		Dummy->Prev = Dummy;
+		Dummy->Next = Dummy;
 		Size = 0;
+#ifdef _DEBUG
+		++FixLevel;
+#endif
 	}
 
 public:
-	// 이미 구현한 vector에서 가져와야겠다. 어차피 거기서 거긴데.
-	size_t GetSize() const noexcept
+	size_t GetSize() const
 	{
 		return Size;
 	}
-	bool IsEmpty() const noexcept
+
+	Type& GetBack() noexcept
 	{
-		return Size == 0;
+		assert(Size);
+
+		return Dummy->Prev->Data;
 	}
-	// Back, Front는 결국 Tail과 Head.
-	Type& Back() noexcept
+	const Type& GetBack() const noexcept
 	{
-		// 끝에 뭐 없으면 터트려.
-		assert(Tail);
-		return Tail->Data;
+		assert(Size);
+
+		return Dummy->Prev->Data;
 	}
-	const Type& Back() const noexcept
+
+	Type& GetFront() noexcept
 	{
-		assert(Tail);
-		return Tail->Data;
+		assert(Size);
+
+		return Dummy->Next->Data;
 	}
-	Type& Front() noexcept
+	const Type& GetFront() const noexcept
 	{
-		// 끝에 뭐 없으면 터트려.
-		assert(Head);
-		return Head->Data;
+		assert(Size);
+
+		return Dummy->Next->Data;
 	}
-	const Type& Front() const noexcept
-	{
-		assert(Head);
-		return Head->Data;
-	}
+
 };

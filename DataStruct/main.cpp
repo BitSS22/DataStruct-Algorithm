@@ -39,18 +39,10 @@ int main()
 	// Memory Leak Check
 	_CrtSetDbgFlag(_CRTDBG_LEAK_CHECK_DF | _CRTDBG_ALLOC_MEM_DF);
 
-	std::vector<int> vv;
-	vv.emplace_back(6);
-	vector<MyClass> v = {};
+	list l;
+	std::list<int> ll;
 
-	v.Reserve(10);
-	for (size_t i = 0; i < 10; ++i)
-	{
-		MyClass a = v.EmplaceBack(i);
-	}
-
-	for (size_t i = 0; i < 10; ++i)
-		std::cout << v[i].GetValue() << " ";
+	
 
 	SortTest();
 }

@@ -9,7 +9,7 @@
 #include "Utility.h"
 
 // 원활한 템플릿 코드 작성을 위한 using. 나중에 주석 처리한다.
-using Type = int;
+//using Type = int;
 
 // vector를 구현해보자.
 // 커스텀 Allocator까지는 받지 않는다. 머리 아프다..
