@@ -152,6 +152,7 @@ public:
 private:
 	Node* Dummy = nullptr;
 	size_t Size = 0;
+	// debug일때는 변경 된 list인지 체크할 것이다.
 #ifdef _DEBUG
 	size_t FixLevel = 0;
 #endif
