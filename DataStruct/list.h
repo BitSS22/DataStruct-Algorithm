@@ -12,18 +12,19 @@ class list
 	// 외부에서 이런 구조체의 존재를 알 필요 없다. 이너클래스.
 	struct Node
 	{
-		struct R_Value_Flag{};
+		struct Emplace_Flag{};
 
 		friend class list;
 	private:
 		Node() {}
 		Node(const Type& _Item)
 			: Data(_Item) {}
-		Node(const Type& _Item)
-			: Data(_Item) {}
-		// 명시적으로 R-Value 생성자 호출.
-		Node(R_Value_Flag, Type&& _Item)
+		Node(Type&& _Item)
 			: Data(Utility::Move(_Item)) {}
+		// 명시적으로 Forward 생성자 호출.
+		template<typename... Types>
+		Node(Emplace_Flag, Types&&... _Items)
+			: Data(Utility::Forward<Types>(_Items)...) {}
 
 		Node* Prev = nullptr;
 		Node* Next= nullptr;
@@ -31,9 +32,11 @@ class list
 
 	};
 
+public:
 	// Iterator도 구현해본다.
 	class Iterator
 	{
+		friend class list;
 	public:
 		Iterator() {}
 #ifdef _DEBUG
@@ -58,7 +61,8 @@ class list
 		Type& operator*() noexcept
 		{
 #ifdef  _DEBUG
-			DereferenceInvalidCheck();
+			BasicInvalidCheck();
+			assert(ptr != Owner->Dummy);
 #endif
 			return ptr->Data;
 		}
@@ -74,7 +78,7 @@ class list
 		Iterator& operator++()
 		{
 #ifdef _DEBUG
-			DereferenceInvalidCheck();
+			IncrementInvalidCheck();
 #endif
 			ptr = ptr->Next;
 			return *this;
@@ -82,10 +86,27 @@ class list
 		Iterator operator++(int)
 		{
 #ifdef _DEBUG
-			DereferenceInvalidCheck();
+			IncrementInvalidCheck();
 #endif
 			Iterator RetrunIter = *this;
 			ptr = ptr->Next;
+			return RetrunIter;
+		}
+		Iterator& operator--()
+		{
+#ifdef _DEBUG
+			DecrementInvalidCheck();
+#endif
+			ptr = ptr->Prev;
+			return *this;
+		}
+		Iterator operator--(int)
+		{
+#ifdef _DEBUG
+			DecrementInvalidCheck();
+#endif
+			Iterator RetrunIter = *this;
+			ptr = ptr->Prev;
 			return RetrunIter;
 		}
 
@@ -100,21 +121,26 @@ class list
 	private:
 		void BasicInvalidCheck()
 		{
+			// ptr이 nullptr이니?
+			assert(ptr);
 			// 주인이 nullptr이니?
 			assert(Owner);
-			// 주인이 이동, 복사, 등으로 바뀌었니?
+			// 주인이 이동, 복사, 삭제등으로 바뀌었니?
 			assert(Owner->Dummy);
 			// 변경 된 list니?
 			assert(FixLevel == Owner->FixLevel);
 		}
-		void DereferenceInvalidCheck()
+		void IncrementInvalidCheck()
 		{
 			BasicInvalidCheck();
 
-			// ptr이 nullptr이니?
-			assert(ptr);
-			// 현재 가리키는게 더미노드니?
 			assert(ptr != Owner->Dummy);
+		}
+		void DecrementInvalidCheck()
+		{
+			BasicInvalidCheck();
+
+			assert(ptr->Prev != Owner->Dummy);
 		}
 #endif
 	};
@@ -178,7 +204,24 @@ public:
 	}
 	void PushBack(Type&& _Item)
 	{
-		Node* NewNode = new Node(Node::R_Value_Flag(), Utility::Forward<Type>(_Item));
+		Node* NewNode = new Node(Utility::Forward<Type>(_Item));
+
+		Node* Prev = Dummy->Prev;
+		Prev->Next = NewNode;
+		Dummy->Prev = NewNode;
+
+		NewNode->Prev = Prev;
+		NewNode->Next = Dummy;
+
+		++Size;
+#ifdef _DEBUG
+		++FixLevel;
+#endif
+	}
+	template<typename... Types>
+	void EmplaceBack(Types... _Items)
+	{
+		Node* NewNode = new Node(Node::Emplace_Flag(), Utility::Forward<Type>(_Items)...);
 
 		Node* Prev = Dummy->Prev;
 		Prev->Next = NewNode;
@@ -211,7 +254,24 @@ public:
 	}
 	void PushFront(Type&& _Item)
 	{
-		Node* NewNode = new Node(Node::R_Value_Flag(), Utility::Forward<Type>(_Item));
+		Node* NewNode = new Node(Utility::Forward<Type>(_Item));
+
+		Node* Next = Dummy->Next;
+		Next->Prev = NewNode;
+		Dummy->Next = NewNode;
+
+		NewNode->Prev = Dummy;
+		NewNode->Next = Next;
+
+		++Size;
+#ifdef _DEBUG
+		++FixLevel;
+#endif
+	}
+	template<typename... Types>
+	void EmplaceFront(Types&&... _Items)
+	{
+		Node* NewNode = new Node(Node::Emplace_Flag(), Utility::Forward<Type>(_Items)...);
 
 		Node* Next = Dummy->Next;
 		Next->Prev = NewNode;
@@ -265,6 +325,72 @@ public:
 #endif
 	}
 
+	// 중간 삽입.(_Where 뒤쪽에 삽입한다.)
+	Iterator Insert(Iterator _Where, const Type& _Item)
+	{
+#ifdef _DEBUG
+		_Where.BasicInvalidCheck();
+#endif
+		Node* NewNode = new Node(_Item);
+
+		Node* WNode = _Where.ptr;
+		Node* WPrev = WNode->Prev;
+
+		WNode->Prev = NewNode;
+		WPrev->Next = NewNode;
+
+		NewNode->Prev = WPrev;
+		NewNode->Next = WNode;
+
+		++Size;
+#ifdef _DEBUG
+		++FixLevel;
+		// 삽입한 노드를 가르키는 Iterator return.
+		return Iterator(NewNode, this);
+#else
+		return Iterator(NewNode);
+#endif
+	}
+
+	Iterator Erase(Iterator _Start, Iterator _End) noexcept
+	{
+#ifdef _DEBUG
+		_Start.BasicInvalidCheck();
+		_End.BasicInvalidCheck();
+		assert(_Start != End());
+		assert(_Start != _End);
+#endif
+		Node* WNode = _Start.ptr;
+		Node* WPrev = WNode->Prev;
+
+		while (WNode != _End.ptr)
+		{
+			assert(WNode != Dummy);
+			Node* DeleteNode = WNode;
+			WNode = WNode->Next;
+			delete DeleteNode;
+			--Size;
+		}
+
+		WPrev->Next = WNode;
+		WNode->Prev = WPrev;
+
+#ifdef _DEBUG
+		++FixLevel;
+		return Iterator(WNode, this);
+#else
+		return Iterator(WNode);
+#endif
+	}
+
+	Iterator Erase(Iterator _Where) noexcept
+	{
+		Iterator NextIter = _Where;
+
+		return Erase(_Where, ++NextIter);
+	}
+
+
 	void Clear()
 	{
 		Node* CurNode = Dummy->Next;
@@ -314,6 +440,24 @@ public:
 		assert(Size);
 
 		return Dummy->Next->Data;
+	}
+	// Begin은 첫번째 노드를 반환.
+	Iterator Begin() const noexcept
+	{
+#ifdef _DEBUG
+		return Iterator(Dummy->Next, this);
+#else
+		return Iterator(Dummy->Next);
+#endif
+	}
+	// End는 Dummy를 반환한다.
+	Iterator End() const noexcept
+	{
+#ifdef _DEBUG
+		return Iterator(Dummy, this);
+#else
+		return Iterator(Dummy);
+#endif
 	}
 
 };

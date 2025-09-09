@@ -40,9 +40,20 @@ int main()
 	_CrtSetDbgFlag(_CRTDBG_LEAK_CHECK_DF | _CRTDBG_ALLOC_MEM_DF);
 
 	list l;
-	std::list<int> ll;
+	list ll;
 
+	std::list<int> lll;
 	
+	for (size_t i = 0; i < 10; ++i)
+	{
+		ll.PushBack(i);
+	}
+	
+	list::Iterator iter = ll.Begin();
+	list::Iterator eiter = ll.End();
+	++iter;
+	--eiter;
+	iter = ll.Erase(iter);
 
 	SortTest();
 }
