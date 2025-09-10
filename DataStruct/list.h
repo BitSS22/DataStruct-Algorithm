@@ -3,9 +3,9 @@
 
 #include "Utility.h"
 
-using Type = int;
+// using Type = int;
 
-// template<typename Type>
+template<typename Type>
 class list
 {
 	// 이전 노드, 다음 노드, 값을 가진 구조체.
@@ -27,7 +27,7 @@ class list
 			: Data(Utility::Forward<Types>(_Items)...) {}
 
 		Node* Prev = nullptr;
-		Node* Next= nullptr;
+		Node* Next = nullptr;
 		Type Data = {};
 
 	};
@@ -89,9 +89,9 @@ public:
 #ifdef _DEBUG
 			IncrementInvalidCheck();
 #endif
-			Iterator RetrunIter = *this;
+			Iterator ReturnIter = *this;
 			ptr = ptr->Next;
-			return RetrunIter;
+			return ReturnIter;
 		}
 		Iterator& operator--()
 		{
@@ -220,9 +220,9 @@ public:
 #endif
 	}
 	template<typename... Types>
-	void EmplaceBack(Types... _Items)
+	Type& EmplaceBack(Types... _Items)
 	{
-		Node* NewNode = new Node(Node::Emplace_Flag(), Utility::Forward<Type>(_Items)...);
+		Node* NewNode = new Node(Node::Emplace_Flag(), Utility::Forward<Types>(_Items)...);
 
 		Node* Prev = Dummy->Prev;
 		Prev->Next = NewNode;
@@ -235,6 +235,7 @@ public:
 #ifdef _DEBUG
 		++FixLevel;
 #endif
+		return NewNode->Data;
 	}
 
 	void PushFront(const Type& _Item)
@@ -270,9 +271,9 @@ public:
 #endif
 	}
 	template<typename... Types>
-	void EmplaceFront(Types&&... _Items)
+	Type& EmplaceFront(Types&&... _Items)
 	{
-		Node* NewNode = new Node(Node::Emplace_Flag(), Utility::Forward<Type>(_Items)...);
+		Node* NewNode = new Node(Node::Emplace_Flag(), Utility::Forward<Types>(_Items)...);
 
 		Node* Next = Dummy->Next;
 		Next->Prev = NewNode;
@@ -285,6 +286,7 @@ public:
 #ifdef _DEBUG
 		++FixLevel;
 #endif
+		return NewNode->Data;
 	}
 
 	void PopBack()

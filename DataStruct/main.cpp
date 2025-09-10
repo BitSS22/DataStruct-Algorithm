@@ -39,18 +39,18 @@ int main()
 	// Memory Leak Check
 	_CrtSetDbgFlag(_CRTDBG_LEAK_CHECK_DF | _CRTDBG_ALLOC_MEM_DF);
 
-	list l;
-	list ll;
+	list<MyClass> l;
+	list<MyClass> ll;
 
 	std::list<int> lll;
 	
 	for (size_t i = 0; i < 10; ++i)
 	{
-		ll.PushBack(i);
+		ll.EmplaceBack(i);
 	}
 	
-	list::Iterator iter = ll.Begin();
-	list::Iterator eiter = ll.End();
+	list<MyClass>::Iterator iter = ll.Begin();
+	list<MyClass>::Iterator eiter = ll.End();
 	++iter;
 	--eiter;
 	iter = ll.Erase(iter);
