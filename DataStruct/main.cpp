@@ -48,7 +48,8 @@ int main()
 	{
 		ll.EmplaceBack(i);
 	}
-	
+	std::map<int, int> m;
+	m.insert(,)
 	list<MyClass>::Iterator iter = ll.Begin();
 	list<MyClass>::Iterator eiter = ll.End();
 	++iter;

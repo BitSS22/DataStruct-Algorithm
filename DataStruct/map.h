@@ -6,9 +6,9 @@
 
 using Type1 = int;
 using Type2 = int;
+using Compare = bool(*)(const int&, const int&);
 
-
-template <typename Type1, Type2> requires(Type1 a, Type1 b) { a < b; }
+//template <typename Type1, typename Type2, typename Compare>
 class map
 {
 public:
@@ -24,7 +24,7 @@ public:
 		// Type을 2개 받는다.
 		template <typename U1, typename U2>
 		// 템플릿 U1, U2 제약 조건. U1, U2로 각각 Type1, Type2의 생성자 호출이 가능한가?
-			requires std::constructible_from<Type1, U1&&> &&	std::constructible_from<Type2, U2&&>
+			requires std::constructible_from<Type1, U1&&>&& std::constructible_from<Type2, U2&&>
 		// Key, Value 둘중 하나라도 암시적 변환이 불가능하다면 explicit 속성.
 			explicit(!std::convertible_to<U1&&, Type1> || !std::convertible_to<U2&&, Type2>)
 		// Forwarding Reference. template 인자로 &&이므로 &, && 다 받아 진다.
@@ -33,7 +33,7 @@ public:
 			noexcept(noexcept(Type1(Utility::Forward<U1>(_Key))) && noexcept(Type2(Utility::Forward<U2>(_Value))))
 			: Key(Utility::Forward<U1>(_Key))
 			, Value(Utility::Forward<U2>(_Value)) {}
-
+		// 이걸로 & &, && &, & &&, && && 네가지 모두를 사용할 수 있다. (중요는 requires, Forward.)
 	public:
 		Type1 Key = {};
 		Type2 Value = {};
@@ -44,8 +44,16 @@ public:
 	{
 		friend class map;
 	private:
-		Node* Prev = nullptr;
-		Node* Next = nullptr;
+		Node() = default;
+		Node(const Pair& _Item)
+			: Data(_Item) {}
+		Node(Pair&& _Item)
+			: Data(Utility::Move(_Item)) {}
+
+	private:
+		Node* Parent = nullptr;
+		Node* LeftChild = nullptr;
+		Node* RightChild = nullptr;
 		Pair Data = {};
 	};
 
@@ -63,5 +71,19 @@ public:
 private:
 	Node* Root = nullptr;
 	size_t Size = 0;
+
+public:
+	void Insert(const Pair& _Item)
+	{
+		Node* ParentNode = Root;
+		Node* CurNode = Root;
+
+		while (CurNode != nullptr)
+		{
+			
+		}
+
+		new Node(_Item);
+	}
 
 };
