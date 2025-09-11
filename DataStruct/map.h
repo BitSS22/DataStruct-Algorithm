@@ -60,6 +60,105 @@ public:
 		Node* LeftChild = nullptr;
 		Node* RightChild = nullptr;
 		Pair Data = {};
+
+	private:
+		// 중위 순회 기준 다음 노드, 이전 노드를 찾는 함수를 만들겠다.
+		// 내부에서만 쓴다. Iterator ++, --에도 사용 할 것.
+		static Node* InOrderNext(Node* _CurNode) noexcept
+		{
+			// 다음 값 찾기.
+			// 1. 나보다 큰 값은 어디에 존재할 수 있는가?
+			// 1-1. 나의 오른쪽으로 타고 내려간 노드들은 전부 나보다 크다. (Parent < RightChild)
+			// 1-2. 나를 왼쪽 자식으로 가지는 부모들과, 그 자식들은 전부 나보다 크다. (LeftChild < Parent)
+			// -> + 나의 부모를 타고 올라가다가 우측 부모가 존재한다면, 그 부모는 나보다 크다. (나는 결국 그 오른쪽 부모를 타고 내려왔기 때문에)
+			// 그렇다면 어느 순서로 찾아야 하는가? (어느 값이 바로 다음으로 큰 값인가?
+			// 1-1. 나의 오른쪽 자식 -> 왼쪽 자식이 없을 때 까지 타고 내려가기
+			// 1-2. 나의 오른쪽 자식
+			// 1-3. 오른쪽 자식이 없다면 나의 오른쪽 부모
+			// 1-4. 왼쪽 부모로 타고 올라가다가 오른쪽 부모가 있다면. (없다면 Root (nullptr)을 만날 것)
+			// 1-5. 위 사항이 전부 아니라면 내가 가장 큰 값이다.
+
+			// 오른쪽 자식 있니?
+			if (_CurNode->RightChild != nullptr)
+			{
+				_CurNode = _CurNode->RightChild;
+				// 있으면 왼쪽 자식 쭉 내려가자.
+				while (_CurNode->LeftChild != nullptr)
+				{
+					_CurNode = _CurNode->LeftChild;
+				}
+			}
+			else
+			{
+				while (true)
+				{
+					// Finder == Root
+					if (_CurNode->Parent == nullptr)
+					{
+						return nullptr;
+					}
+					// 내가 왼쪽 자식이라면
+					else if (_CurNode->Parent->LeftChild == _CurNode)
+					{
+						// 그 부모가 나의 다음 값
+						return _CurNode->Parent;
+					}
+					// 오른쪽 자식도 없고, 오른쪽 부모도 없으면 왼쪽 부모로 올라가보자.
+					else
+					{
+						_CurNode = _CurNode->Parent;
+					}
+				}
+			}
+
+			return _CurNode;
+		}
+
+		static Node* InOrderPrev(Node* _CurNode) noexcept
+		{
+			// 이전 값 찾기.
+			// 큰 값 찾기의 반대 개념이다.
+			// 1-1. 나의 왼쪽으로 타고 내려간 노드들은 전부 나보다 작다.
+			// 1-2. 나를 오른쪽 자식으로 가지는 부모들과, 그 자식들은 전부 나보다 작다.
+			// -> + 나의 부모를 타고 올라가다가 좌측 부모가 존재한다면, 그 부모는 나보다 작다. (나는 결국 그 왼쪽 부모를 타고 내려왔기 때문에)
+			// 그렇다면 어느 순서로 찾아야 하는가? (어느 값이 바로 다음으로 작은 값인가?
+			// 1-1. 나의 왼쪽 자식 -> 오른쪽 자식이 없을 때 까지 타고 내려가기
+			// 1-2. 나의 왼쪽 자식
+			// 1-3. 왼쪽 자식이 없다면 나의 오른쪽 부모
+			// 1-4. 오른쪽 부모로 타고 올라가다가 왼쪽 부모가 있다면. (없다면 Root (nullptr)을 만날 것)
+			// 1-5. 위 사항이 전부 아니라면 내가 가장 작은 값이다.
+
+			if (_CurNode->LeftChild != nullptr)
+			{
+				_CurNode = _CurNode->LeftChild;
+
+				while (_CurNode->RightChild != nullptr)
+				{
+					_CurNode = _CurNode->RightChild;
+				}
+			}
+			else
+			{
+				while (true)
+				{
+					if (_CurNode->Parent == nullptr)
+					{
+						return nullptr;
+					}
+					else if (_CurNode->Parent->RightChild == _CurNode)
+					{
+						return _CurNode->Parent;
+					}
+					else
+					{
+						_CurNode = _CurNode->Parent;
+					}
+				}
+			}
+
+			return _CurNode;
+		}
+
 	};
 
 	// 그냥 간단하게 End, Begin, ++, --, ->, * 정도의 operator 정의로 포인터처럼 동작하게만 만들겠다.
@@ -70,17 +169,67 @@ public:
 		friend class map;
 		friend class Node;
 		Iterator() = default;
-		Iterator(Node* _Node)
-			: ptr(_Node) {}
+		Iterator(map* _Owner, Node* _Node)
+			: Owner(_Owner)
+			, ptr(_Node) {}
+
+	public:
+		Iterator& operator++()
+		{
+			assert(ptr);
+
+			Node::InOrderNext(ptr);
+			return *this;
+		}
+		Iterator operator++(int)
+		{
+			Iterator Copy = *this;
+			++ptr;
+			return Copy;
+		}
+		Iterator& operator--()
+		{
+			if (ptr == nullptr)
+			{
+				Node* Finder = Owner->Root;
+				while (true)
+				{
+					if (Finder != Finder->RightChild)
+					{
+						Finder = Finder->RightChild;
+					}
+					else
+					{
+						ptr = Finder;
+						return *this;
+					}
+				}
+			}
+
+			assert(Node::InOrderPrev(ptr) != nullptr);
+
+			Node::InOrderPrev(ptr);
+			return *this;
+		}
+		Iterator operator--(int)
+		{
+			Iterator Copy = *this;
+			--ptr;
+			return Copy;
+		}
 
 	private:
+		map* Owner = nullptr;
 		Node* ptr = nullptr;
 
 	};
 
 public:
 	map() {}
-	~map() {}
+	~map()
+	{
+		Clear();
+	}
 
 	map(const map& _Other) = delete;
 	map(map&& _Other) noexcept = delete;
@@ -94,6 +243,74 @@ private:
 	Compare* Comp = nullptr;
 	size_t Size = 0;
 
+private:
+	// 세개의 순회를 만들고, Node에 대해 동작할 함수를 작성할 것.
+	// 전위 : 부모 -> 왼쪽 -> 오른쪽
+	// 중위 : 왼쪽 -> 부모 -> 오른쪽
+	// 후위 : 왼쪽 -> 오른쪽 -> 부모
+	// 즉, 부모 노드를 언제 확인하냐의 차이.
+	// 재귀함수로 간단하게 구현하겠다.
+	// map 내부에서만 쓸 함수고, 잘못 호출하면 터트려버리겠다.
+
+	// 전위 순회
+	void PreOrder(Node* _Node, void (*_Func)(Node*))
+	{
+		// nullptr 넣었니?
+		assert(_Node);
+		assert(_Func);
+		// 비어 있는데 뭘 하려고?
+		assert(!Empty());
+
+		_Func(_Node);
+		
+		if (nullptr != _Node->LeftChild)
+		{
+			PreOrder(_Node->LeftChild, _Func);
+		}
+		if (nullptr != _Node->RightChild)
+		{
+			PreOrder(_Node->RightChild, _Func);
+		}
+	}
+	// 중위 순회
+	void InOrder(Node* _Node, void (*_Func)(Node*))
+	{
+		assert(_Node);
+		assert(_Func);
+		assert(!Empty());
+
+		if (nullptr != _Node->LeftChild)
+		{
+			InOrder(_Node->LeftChild, _Func);
+		}
+
+		_Func(_Node);
+
+		if (nullptr != _Node->RightChild)
+		{
+			InOrder(_Node->RightChild, _Func);
+		}
+	}
+	// 후위 순회
+	void PostOrder(Node* _Node, void (*_Func)(Node*))
+	{
+		assert(_Node);
+		assert(_Func);
+		assert(!Empty());
+
+		if (nullptr != _Node->LeftChild)
+		{
+			PostOrder(_Node->LeftChild, _Func);
+		}
+		if (nullptr != _Node->RightChild)
+		{
+			PostOrder(_Node->RightChild, _Func);
+		}
+
+		// 할 일을 나중에 하면 그게 전위 후위 순회 차이다.
+		_Func(_Node);
+	}
+
 public:
 	Iterator Insert(const Pair& _Item)
 	{
@@ -101,7 +318,7 @@ public:
 		{
 			Root = new Node(_Item);
 			++Size;
-			return Iterator(Root);
+			return Iterator(this, Root);
 		}
 
 		Node* ParentNode = nullptr;
@@ -116,12 +333,12 @@ public:
 				CurNode = CurNode->RightChild;
 				IsDownLeft = false;
 			}
-			// 각각 서로 작지 않다 == 같다.
-			// 사용자 key에 대해 operator==을 정의할 필요가 없다.
+			// 서로 작지 않다 == 같다.
+			// 사용자 key가 operator==을 정의할 필요가 없다.
 			else if (false == (*Comp)(CurNode->Data.Key, _Item.Key) && false == (*Comp)(_Item.Key, CurNode->Data.Key))
 			{
 				// 같으면 이미 존재하는 Key에 대한 Iterator 반환.
-				return Iterator(CurNode);
+				return Iterator(this, CurNode);
 			}
 			else
 			{
@@ -144,7 +361,83 @@ public:
 		}
 
 		++Size;
-		return Iterator(NewNode);
+		return Iterator(this, NewNode);
+	}
+
+	Iterator Find(Type1 _Key)
+	{
+		Node* CurNode = Root;
+
+		// CurNode가 nullptr이면 빠져 나올 것.
+		while (CurNode != nullptr)
+		{
+			// 결과를 한번 받아서 재사용.
+			bool LessLeft = (*Comp)(CurNode->Data.Key, _Key);
+
+			if (LessLeft)
+			{
+				CurNode = CurNode->RightChild;
+			}
+			else if (false == LessLeft && false == (*Comp)(_Key, CurNode->Data.Key))
+			{
+				// 찾았다.
+				break;
+			}
+			else
+			{
+				CurNode = CurNode->LeftChild;
+			}
+		}
+
+		// 찾지 못했다면 nullptr Iterator가 return 될 것.
+		// 찾았다면 CurNode를 가진 Iterator가 return 될 것.
+		return Iterator(this, CurNode);
+	}
+
+	void Clear()
+	{
+		// 비어 있다면 그냥 종료.
+		if (Empty())
+			return;
+
+		// PostOrder로 Leaf부터 지워준다.
+		PostOrder(Root, [](Node* _Node) {delete _Node; });
+		Root = nullptr;
+		Size = 0;
+	}
+
+public:
+	size_t GetSize() const noexcept
+	{
+		return Size;
+	}
+	bool Empty() const noexcept
+	{
+		return Size == 0;
+	}
+	Iterator Begin() noexcept
+	{
+		// 비어있다면 End Iterator를 주겠다.
+		if (Empty())
+		{
+			return End();
+		}
+
+		Node* CurNode = Root;
+
+		// 먼저 LeftChild가 존재하는지 확인.
+		// nullptr이라면 현재 map에서 가장 작은 key값일 것.
+		while (CurNode->LeftChild != nullptr)
+		{
+			CurNode = CurNode->LeftChild;
+		}
+
+		return Iterator(this, CurNode);
+	}
+	Iterator End() noexcept
+	{
+		// End Iterator는 nullptr로 정의하겠다.
+		return Iterator(this, nullptr);
 	}
 
 };
