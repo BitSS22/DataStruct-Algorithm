@@ -8,7 +8,7 @@
 //using Type2 = int;
 //using Compare = bool(*)(const int&, const int&);
 
-template <typename Type1, typename Type2, typename Compare = decltype(Utility::DefaultCompare<Type1>)>
+template <typename Type1, typename Type2, typename Compare = bool(*)(const Type1&, const Type1&)>
 class map
 {
 public:
@@ -171,7 +171,8 @@ public:
 		Iterator() = default;
 		Iterator(map* _Owner, Node* _Node)
 			: Owner(_Owner)
-			, ptr(_Node) {}
+			, ptr(_Node) {
+		}
 
 	public:
 		bool operator== (Iterator _Other) const
@@ -209,7 +210,7 @@ public:
 			{
 				Node* Finder = Owner->Root;
 				assert(Finder);
-				
+
 				while (Finder->RightChild != nullptr)
 				{
 					Finder = Finder->RightChild;
@@ -239,9 +240,11 @@ public:
 
 public:
 	map()
-		: Comp(Utility::DefaultCompare<Type1>) {}
+		: Comp(Utility::DefaultCompare<Type1>) {
+	}
 	map(Compare _Comp)
-		: Comp(_Comp) {}
+		: Comp(_Comp) {
+	}
 	~map()
 	{
 		Clear();
@@ -278,7 +281,7 @@ private:
 		assert(!Empty());
 
 		_Func(_Node);
-		
+
 		if (nullptr != _Node->LeftChild)
 		{
 			PreOrder(_Node->LeftChild, _Func);
@@ -408,6 +411,26 @@ public:
 		// 찾지 못했다면 nullptr Iterator가 return 될 것.
 		// 찾았다면 CurNode를 가진 Iterator가 return 될 것.
 		return Iterator(this, CurNode);
+	}
+
+	Iterator Erase(Iterator _Where)
+	{
+		// 기본적인 유효성 검사.
+		assert(_Where->Owner != nullptr);
+		assert(_Where->ptr != nullptr);
+
+		// BST의 삭제를 몇가지 케이스로 나눈다.
+		// 1. 자식이 없다.
+		// Leaf Node이므로 부모와의 연결만 끊어주면 끝.
+		// 2. 자식이 하나만 있다.
+		// 삭제 후 자식 객체와 부모 객체를 이어주면 끝.
+		// 3. 자식이 둘 있다.
+		// InOrderPrev 혹은 InOrderNext 노드와 자리를 바꾸고, 교체된 위치의 노드를 제거한다.
+		// 자식이 둘 이상인 노드의 다음 노드 (혹은 이전 노드)는 자식이 둘이 아님이 보장된다.
+		// -> InOrderNext Or Prev에서 어느 쪽 자식이 nullptr일 때 까지 내려갔으므로.
+		// 삭제 후 Root노드가 변경되었는지 확인 하고, 변경되었다면 갱신한다.
+
+
 	}
 
 	void Clear()
