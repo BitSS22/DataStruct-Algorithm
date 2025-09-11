@@ -38,25 +38,28 @@ int main()
 {
 	// Memory Leak Check
 	_CrtSetDbgFlag(_CRTDBG_LEAK_CHECK_DF | _CRTDBG_ALLOC_MEM_DF);
+	std::map<int, int>();
+	map m = {};
 
-	list<MyClass> l;
-	list<MyClass> ll;
+	m.Insert(map::Pair(7, 7));
 
-	std::list<int> lll;
-	
-	for (size_t i = 0; i < 10; ++i)
+	m.Insert(map::Pair(3, 3));
+	m.Insert(map::Pair(11, 11));
+
+	m.Insert(map::Pair(1, 1));
+	m.Insert(map::Pair(5, 5));
+	m.Insert(map::Pair(9, 9));
+	m.Insert(map::Pair(13, 13));
+
+
+	m.Insert(map::Pair(13, 0));
+
+	for (map::Iterator iter = m.Begin(); iter != m.End(); ++iter)
 	{
-		ll.EmplaceBack(i);
+		std::cout << iter->Key << " " << iter->Value << std::endl;
 	}
-	std::map<int, int> m;
-	
-	list<MyClass>::Iterator iter = ll.Begin();
-	list<MyClass>::Iterator eiter = ll.End();
-	++iter;
-	--eiter;
-	iter = ll.Erase(iter);
 
-	SortTest();
+	// SortTest();
 }
 
 void SortTest()

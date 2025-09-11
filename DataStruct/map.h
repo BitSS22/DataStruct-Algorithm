@@ -4,11 +4,11 @@
 
 #include "Utility.h"
 
-using Type1 = int;
-using Type2 = int;
-using Compare = bool(*)(const int&, const int&);
+//using Type1 = int;
+//using Type2 = int;
+//using Compare = bool(*)(const int&, const int&);
 
-//template <typename Type1, typename Type2, typename Compare>
+template <typename Type1, typename Type2, typename Compare = decltype(Utility::DefaultCompare<Type1>)>
 class map
 {
 public:
@@ -174,17 +174,33 @@ public:
 			, ptr(_Node) {}
 
 	public:
+		bool operator== (Iterator _Other) const
+		{
+			return Owner == _Other.Owner && ptr == _Other.ptr;
+		}
+		bool operator!= (Iterator _Other) const
+		{
+			return !(*this == _Other);
+		}
+		Pair& operator*()
+		{
+			return ptr->Data;
+		}
+		Pair* operator->()
+		{
+			return &ptr->Data;
+		}
 		Iterator& operator++()
 		{
 			assert(ptr);
 
-			Node::InOrderNext(ptr);
+			ptr = Node::InOrderNext(ptr);
 			return *this;
 		}
 		Iterator operator++(int)
 		{
 			Iterator Copy = *this;
-			++ptr;
+			++*this;
 			return Copy;
 		}
 		Iterator& operator--()
@@ -192,29 +208,26 @@ public:
 			if (ptr == nullptr)
 			{
 				Node* Finder = Owner->Root;
-				while (true)
+				assert(Finder);
+				
+				while (Finder->RightChild != nullptr)
 				{
-					if (Finder != Finder->RightChild)
-					{
-						Finder = Finder->RightChild;
-					}
-					else
-					{
-						ptr = Finder;
-						return *this;
-					}
+					Finder = Finder->RightChild;
 				}
+
+				ptr = Finder;
+				return *this;
 			}
 
-			assert(Node::InOrderPrev(ptr) != nullptr);
+			ptr = Node::InOrderPrev(ptr);
+			assert(ptr);
 
-			Node::InOrderPrev(ptr);
 			return *this;
 		}
 		Iterator operator--(int)
 		{
 			Iterator Copy = *this;
-			--ptr;
+			--*this;
 			return Copy;
 		}
 
@@ -225,7 +238,10 @@ public:
 	};
 
 public:
-	map() {}
+	map()
+		: Comp(Utility::DefaultCompare<Type1>) {}
+	map(Compare _Comp)
+		: Comp(_Comp) {}
 	~map()
 	{
 		Clear();
@@ -240,7 +256,7 @@ public:
 
 private:
 	Node* Root = nullptr;
-	Compare* Comp = nullptr;
+	Compare Comp;
 	size_t Size = 0;
 
 private:
@@ -333,7 +349,7 @@ public:
 				CurNode = CurNode->RightChild;
 				IsDownLeft = false;
 			}
-			// 서로 작지 않다 == 같다.
+			// 서로 서로 작지 않다 == 같다.
 			// 사용자 key가 operator==을 정의할 필요가 없다.
 			else if (false == (*Comp)(CurNode->Data.Key, _Item.Key) && false == (*Comp)(_Item.Key, CurNode->Data.Key))
 			{
