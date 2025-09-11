@@ -39,7 +39,6 @@ int main()
 	// Memory Leak Check
 	_CrtSetDbgFlag(_CRTDBG_LEAK_CHECK_DF | _CRTDBG_ALLOC_MEM_DF);
 	std::map<int, int> mm = {};
-	mm.erase(3);
 	
 	map<int,int> m = {};
 
@@ -55,6 +54,9 @@ int main()
 
 
 	m.Insert(map<int, int>::Pair(13, 0));
+
+	auto iter = m.Find(7);
+	m.Erase(iter);
 
 	for (map<int, int>::Iterator iter = m.Begin(); iter != m.End(); ++iter)
 	{

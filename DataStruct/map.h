@@ -22,6 +22,9 @@ public:
 		Pair(Pair&&) noexcept = default;
 		~Pair() = default;
 
+	public:
+		Pair& operator= (const Pair& _Other) = default;
+		Pair& operator= (Pair&& _Other) = default;
 		// Type을 2개 받는다.
 		template <typename U1, typename U2>
 		// 템플릿 U1, U2 제약 조건. U1, U2로 각각 Type1, Type2의 생성자 호출이 가능한가?
@@ -412,102 +415,159 @@ public:
 		return Iterator(this, CurNode);
 	}
 
+	// GPT 버전. 훨씬 간결하네? 좀 현타옴. 정리해서 작성.
 	Iterator Erase(Iterator _Where)
 	{
-		// 기본적인 유효성 검사.
+		// 유효성 검사.
 		assert(_Where.Owner == this);
-		assert(_Where->ptr != nullptr);
+	 	assert(_Where.ptr != nullptr);
 
-		// BST의 삭제를 몇가지 케이스로 나눈다.
-		// 1. 자식이 없다.
-		// Leaf Node이므로 부모와의 연결만 끊어주면 끝.
-		// 2. 자식이 하나만 있다.
-		// 삭제 후 자식 객체와 부모 객체를 이어주면 끝.
-		// 3. 자식이 둘 있다.
-		// InOrderPrev 혹은 InOrderNext 노드와 자리를 바꾸고, 교체된 위치의 노드를 제거한다.
-		// 자식이 둘 이상인 노드의 다음 노드 (혹은 이전 노드)는 자식이 둘이 아님이 보장된다.
-		// -> InOrderNext Or Prev에서 오른쪽(왼쪽) 자식이 무조건 있고, 왼쪽(오른쪽) 자식이 nullptr일 때 까지 내려갔으므로.
-		// 삭제 후 Root노드가 변경되었는지 확인 하고, 변경되었다면 갱신한다.
-
+		// 현재 노드와 다음 노드
 		Node* CurNode = _Where.ptr;
-
-		Node* Parent = CurNode->Parent;
-		Node* LeftChild = CurNode->LeftChild;
-		Node* RightChild = CurNode->RightChild;
-
 		Node* NextNode = Node::InOrderNext(CurNode);
 
-		// 자식이 둘이다.
-		// 자식이 둘이라고 함은, Begin(), --End()가 아님이 보장된다.
-		// 둘 체인을 완전히 교체한다.
+		// 반환 Iterator
+		Iterator ReturnIterator = Iterator(this, NextNode);
 
-		if (LeftChild != nullptr && RightChild != nullptr)
+		// 자식이 둘
+		if (CurNode->LeftChild != nullptr && CurNode->RightChild != nullptr)
 		{
-			Parent = CurNode->Parent = NextNode->Parent;
-			LeftChild = CurNode->LeftChild = NextNode->LeftChild;
-			RightChild = CurNode->RightChild = NextNode->RightChild;
-
-			NextNode->Parent = Parent;
-			NextNode->LeftChild = LeftChild;
-			NextNode->RightChild = RightChild;
-
-			// 바뀌는 노드가 Root인가?
-			if (CurNode == Root)
-			{
-				Root = NextNode;
-			}
+			// 둘의 데이터만 교환. 반환 노드도 CurNode.
+			Utility::Swap(NextNode->Data, CurNode->Data);
+			ReturnIterator.ptr = CurNode;
+			// 실제 지울 노드 위치는 NextNode
+			CurNode = NextNode;
 		}
 
-		// 자식이 없니?
-		if (LeftChild == nullptr && RightChild == nullptr)
-		{
-			// 연결 끊어주고 지우면 끝난다.
-			if (Parent != nullptr)
-			{
-				// 내가 어느쪽 자식인지 확인하고 연결 끊기.
-				if (Parent->LeftChild == CurNode)
-				{
-					Parent->LeftChild = nullptr;
-				}
-				else if (Parent->RightChild == CurNode)
-				{
-					Parent->RightChild = nullptr;
-				}
-			}
-			else  // ParentNode == nullptr -> CurNode == Root -> Size == 1.
-			{
-				Root = nullptr;
-			}
-		}
+		// Parent == nullptr -> Root
+		Node* Parent = CurNode->Parent;
+		// 자식이 하나라도 있으면 nullptr이 아닐 것.
+		Node* Child = CurNode->LeftChild != nullptr ? CurNode->LeftChild : CurNode->RightChild;
 
-		Node* Child = LeftChild != nullptr ? LeftChild : RightChild;
-		// 자식이 하나만 있니?
+		// 자식이 하나 있는 경우. 자식의 부모를 Parent로 연결해준다. CurNode == Root라면 Child->Parent == nullptr -> Root가 된다.
 		if (Child != nullptr)
 		{
-			// 내가 어느쪽 자식인지, 아닌지 확인 하고 연결한다.
-			if (Parent != nullptr) // Root가 아님
-			{
-				if (Parent->LeftChild == CurNode)
-				{
-					Parent->LeftChild = Child;
-				}
-				else if (Parent->RightChild == CurNode)
-				{
-					Parent->RightChild = Child;
-				}
-			}
-			else
-			{
-				Root = Child;
-			}
-
 			Child->Parent = Parent;
 		}
 
+		// CurNode == Root라면 Root 갱신
+		if (Parent == nullptr)
+		{
+			Root = Child;
+		}
+		// Parent가 있음. 왼쪽 자식인 경우.
+		else if (Parent->LeftChild == CurNode)
+		{
+			Parent->LeftChild = Child;
+		}
+		// Parent가 있음. 왼쪽 자식도 아님 == 오른쪽 자식
+		else
+		{
+			Parent->RightChild = Child;
+		}
+	
+		// 다 지워졌다. 후처리.
 		delete CurNode;
 		--Size;
-		return Iterator(this, NextNode);;
+		return ReturnIterator;
 	}
+
+	// Iterator Erase(Iterator _Where)
+	// {
+	// 	// 기본적인 유효성 검사.
+	// 	assert(_Where.Owner == this);
+	// 	assert(_Where->ptr != nullptr);
+	// 
+	// 	// BST의 삭제를 몇가지 케이스로 나눈다.
+	// 	// 1. 자식이 없다.
+	// 	// Leaf Node이므로 부모와의 연결만 끊어주면 끝.
+	// 	// 2. 자식이 하나만 있다.
+	// 	// 삭제 후 자식 객체와 부모 객체를 이어주면 끝.
+	// 	// 3. 자식이 둘 있다.
+	// 	// InOrderPrev 혹은 InOrderNext 노드와 자리를 바꾸고, 교체된 위치의 노드를 제거한다.
+	// 	// 자식이 둘 이상인 노드의 다음 노드 (혹은 이전 노드)는 자식이 둘이 아님이 보장된다.
+	// 	// -> InOrderNext Or Prev에서 오른쪽(왼쪽) 자식이 무조건 있고, 왼쪽(오른쪽) 자식이 nullptr일 때 까지 내려갔으므로.
+	// 	// 삭제 후 Root노드가 변경되었는지 확인 하고, 변경되었다면 갱신한다.
+	// 
+	// 	Node* CurNode = _Where.ptr;
+	// 
+	// 	Node* Parent = CurNode->Parent;
+	// 	Node* LeftChild = CurNode->LeftChild;
+	// 	Node* RightChild = CurNode->RightChild;
+	// 
+	// 	Node* NextNode = Node::InOrderNext(CurNode);
+	// 
+	// 	// 자식이 둘이다.
+	// 	// 자식이 둘이라고 함은, Begin(), --End()가 아님이 보장된다.
+	// 	// 둘 체인을 완전히 교체한다.
+	// 
+	// 	if (LeftChild != nullptr && RightChild != nullptr)
+	// 	{
+	// 		Parent = CurNode->Parent = NextNode->Parent;
+	// 		LeftChild = CurNode->LeftChild = NextNode->LeftChild;
+	// 		RightChild = CurNode->RightChild = NextNode->RightChild;
+	// 
+	// 		NextNode->Parent = Parent;
+	// 		NextNode->LeftChild = LeftChild;
+	// 		NextNode->RightChild = RightChild;
+	// 
+	// 		// 바뀌는 노드가 Root인가?
+	// 		if (CurNode == Root)
+	// 		{
+	// 			Root = NextNode;
+	// 		}
+	// 	}
+	// 
+	// 	// 자식이 없니?
+	// 	if (LeftChild == nullptr && RightChild == nullptr)
+	// 	{
+	// 		// 연결 끊어주고 지우면 끝난다.
+	// 		if (Parent != nullptr)
+	// 		{
+	// 			// 내가 어느쪽 자식인지 확인하고 연결 끊기.
+	// 			if (Parent->LeftChild == CurNode)
+	// 			{
+	// 				Parent->LeftChild = nullptr;
+	// 			}
+	// 			else if (Parent->RightChild == CurNode)
+	// 			{
+	// 				Parent->RightChild = nullptr;
+	// 			}
+	// 		}
+	// 		else  // ParentNode == nullptr -> CurNode == Root -> Size == 1.
+	// 		{
+	// 			Root = nullptr;
+	// 		}
+	// 	}
+	// 
+	// 	Node* Child = LeftChild != nullptr ? LeftChild : RightChild;
+	// 	// 자식이 하나만 있니?
+	// 	if (Child != nullptr)
+	// 	{
+	// 		// 내가 어느쪽 자식인지, 아닌지 확인 하고 연결한다.
+	// 		if (Parent != nullptr) // Root가 아님
+	// 		{
+	// 			if (Parent->LeftChild == CurNode)
+	// 			{
+	// 				Parent->LeftChild = Child;
+	// 			}
+	// 			else if (Parent->RightChild == CurNode)
+	// 			{
+	// 				Parent->RightChild = Child;
+	// 			}
+	// 		}
+	// 		else
+	// 		{
+	// 			Root = Child;
+	// 		}
+	// 
+	// 		Child->Parent = Parent;
+	// 	}
+	// 
+	// 	delete CurNode;
+	// 	--Size;
+	// 	return Iterator(this, NextNode);;
+	// }
 
 	void Clear()
 	{
