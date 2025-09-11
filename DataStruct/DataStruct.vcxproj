@@ -130,17 +130,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Heap.h" />
+    <ClInclude Include="heap.h" />
     <ClInclude Include="list.h" />
     <ClInclude Include="map.h" />
     <ClInclude Include="myclass.h" />
+    <ClInclude Include="queue.h" />
     <ClInclude Include="Shuffle.h" />
     <ClInclude Include="Sort.h" />
     <ClInclude Include="Utility.h" />
     <ClInclude Include="vector.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Heap.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
