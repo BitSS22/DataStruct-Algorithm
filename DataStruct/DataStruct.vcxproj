@@ -130,7 +130,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="heap.h" />
+    <ClInclude Include="priority_queue.h" />
     <ClInclude Include="list.h" />
     <ClInclude Include="map.h" />
     <ClInclude Include="myclass.h" />

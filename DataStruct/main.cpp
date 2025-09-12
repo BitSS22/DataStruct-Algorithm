@@ -17,6 +17,7 @@
 #include "list.h"
 #include "map.h"
 #include "queue.h"
+#include "priority_queue.h"
 
 // Make Algorithm
 #include "Utility.h"
