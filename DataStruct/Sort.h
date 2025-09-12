@@ -359,9 +359,26 @@ namespace Sort
 
 #pragma endregion
 #pragma region Quick
-	void QuickSort(Type _Arr[], size_t Size);
+	template <typename Type, typename Compare = std::less<Type>>
+	void QuickSort(Type _Arr[], size_t _Size, Compare _Comp = Compare{})
+	{
+		if (_Size < 2)
+		{
+			return;
+		}
+
+	}
 #pragma endregion
 #pragma region Radix
-	void RadixSort(Type _Arr[], size_t Size);
+	template <typename Type, typename Compare = std::less<Type>>
+	void RadixSort(Type _Arr[], size_t _Size, Compare _Comp = Compare{})
+	{
+		if (_Size < 2)
+		{
+			return;
+		}
+
+
+	}
 #pragma endregion
 };
