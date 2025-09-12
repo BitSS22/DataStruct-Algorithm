@@ -297,7 +297,7 @@ public:
 		// 그래도 debug에서 검사 해야지.
 		assert(_Index < Size);
 		// 너 인덱스 초과야.
-		if (_Index < Size)
+		if (_Index >= Size)
 		{
 			throw std::out_of_range("At() : index out of range");
 		}
@@ -307,11 +307,133 @@ public:
 	const Type& At(size_t _Index) const
 	{
 		assert(_Index < Size);
-		if (_Index < Size)
+		if (_Index >= Size)
 		{
 			throw std::out_of_range("At() const : index out of range");
 		}
 
 		return Arr[_Index];
+	}
+
+	// Heap을 여기 만들어 버리자.
+public:
+	// 서브트리 (부모, 왼쪽, 오른쪽)에 힙화. 자식의 서브트리들은 모두 Heap 상태여야 정상 작동한다.
+		// 부분 트리에도 적용하기 위해 서브트리의 Index를 받는다.
+	template <typename Compare = bool(*)(const Type&, const Type&)>
+	void HeapifyDown(size_t _Index, Compare _Comp = Utility::DefaultCompare)
+	{
+		// 당연히 Size를 넘는 Index가 들어오면 안된다.
+		assert(_Index < Size);
+		// 비교 함수 왜 안줘.
+		assert(_Comp);
+
+		// 배열 갯수가 1가 이하인 배열은 이미 정렬 되었다고 볼 수 있다.
+		if (Size < 2)
+		{
+			return;
+		}
+
+		while (true)
+		{
+			size_t Best = _Index;
+			size_t LeftChild = HeapLeftChild(_Index);
+			size_t RightChild = HeapRightChild(_Index);
+
+			// Size를 넘지 않고 _Comp를 만족하는 자식이 있는가?
+			if (LeftChild < Size && _Comp(Arr[LeftChild], Arr[Best]))
+			{
+				Best = LeftChild;
+			}
+			if (RightChild < Size && _Comp(Arr[RightChild], Arr[Best]))
+			{
+				Best = RightChild;
+			}
+
+			// 없다면 끝.
+			if (Best == _Index)
+			{
+				break;
+			}
+
+			// 있다면 둘의 값을 바꾼다.
+			Utility::Swap(Arr[_Index], Arr[Best]);
+			// 바뀐 자식으로 다시 Heapify.
+			_Index = Best;
+		}
+	}
+
+	// 배열을 완전히 Heap으로 만들어 준다.
+	template <typename Compare = bool(*)(const Type&, const Type&)>
+	void BuildHeap(Compare _Comp = Utility::DefaultCompare)
+	{
+		assert(_Comp);
+
+		if (Size < 2)
+		{
+			return;
+		}
+
+		// _Size / 2 이전의 원소들만이 항상 자식을 가진다. 자식이 없는 서브트리는 이미 정렬된 서브트리. 
+		for (size_t i = Size / 2; i > 0; --i)
+		{
+			// 말단 노드부터 Heap을 충족시킨다.
+			HeapifyDown(i - 1, _Comp);
+		}
+	}
+
+	// 힙 구조가 깨지지 않게 정리한다.
+	// 배열은 이미 힙 구조라고 가정한다.
+	// 당연히 _Comp는 힙화 할때와 같은 함수 기능으로 사용자가 넣어야 한다.
+	template <typename Compare = bool(*)(const Type&, const Type&)>
+	void HeapPush(const Type& _Item, Compare _Comp = Utility::DefaultCompare)
+	{
+		assert(_Comp);
+		
+		PushBack(_Item);
+
+		size_t CurIndex = Size - 1;
+
+		while (CurIndex != 0)
+		{
+			size_t Parent = HeapParent(CurIndex);
+			if (_Comp(Arr[CurIndex], Arr[Parent]))
+			{
+				Utility::Swap(Arr[CurIndex], Arr[Parent]);
+				CurIndex = Parent;
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+
+	// 하나 빼줘.
+	template <typename Compare = bool(*)(const Type&, const Type&)>
+	void HeapPop(Compare _Comp = Utility::DefaultCompare)
+	{
+		assert(Size);
+
+		Utility::Swap(Arr[0], Arr[Size - 1]);
+		PopBack();
+
+		HeapifyDown(0, _Comp);
+	}
+
+	static size_t HeapParent(size_t _Index) noexcept
+	{
+		// _Index는 0이 아니어야 한다. 들어오면 죽이겠다.
+		assert(_Index);
+		return (_Index - 1) / 2;
+	}
+
+	static size_t HeapLeftChild(size_t _Index) noexcept
+	{
+		return _Index * 2 + 1;
+	}
+
+	static size_t HeapRightChild(size_t _Index) noexcept
+	{
+		return _Index * 2 + 2;
 	}
 };
