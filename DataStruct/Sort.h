@@ -379,8 +379,9 @@ namespace Sort
 		// 말도 안돼.
 		assert(_Low <= _High);
 
+		size_t size = _High - _Low + 1;
 		// 정렬 해야 할 원소의 크기가 2개 이하라면 그냥 냅둔다..
-		if (_High - _Low < 2)
+		if (size < 3)
 		{
 			// 성공 여부를 반환 한다.
 			return false;
@@ -414,12 +415,13 @@ namespace Sort
 		// 2개 이하
 		if (!QuickSortMedianOfThree(_Arr, _Low, _High, _Comp))
 		{
-			// InsertSort로 정리한다.
-			if (_High - _Low > 0)
-				InsertSort(_Arr + _Low, _High - _Low + 1, _Comp);
+			// 원소가 2개라면 Swap으로 정리한다.
+			if (_High - _Low + 1 == 2 && _Comp(_Arr[_High], _Arr[_Low]))
+				Utility::Swap(_Arr[_High], _Arr[_Low]);
 			return;
 		}
 
+		// _Low, _High는 이미 Pivot과 대소 관계가 명확해짐.
 		Type& Pivot = _Arr[_Low + 1];
 		size_t Low = _Low + 2;
 		size_t High = _High - 1;
@@ -429,13 +431,13 @@ namespace Sort
 		{
 			// 양쪽에서 알맞은 값을 찾는다.
 			// 여기서 Low < Mid < High가 보장 되었기 때문에 while 탈출 조건은 항상 존재.
-			while (_Comp(_Arr[Low], Pivot))
-			{
-				++Low;
-			}
 			while (_Comp(Pivot, _Arr[High]))
 			{
 				--High;
+			}
+			while (_Comp(_Arr[Low], Pivot))
+			{
+				++Low;
 			}
 			
 			// 교차 했다면 break.
