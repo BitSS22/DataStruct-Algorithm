@@ -319,8 +319,8 @@ public:
 public:
 	// 서브트리 (부모, 왼쪽, 오른쪽)에 힙화. 자식의 서브트리들은 모두 Heap 상태여야 정상 작동한다.
 		// 부분 트리에도 적용하기 위해 서브트리의 Index를 받는다.
-	template <typename Compare = bool(*)(const Type&, const Type&)>
-	void HeapifyDown(size_t _Index, Compare _Comp = Utility::DefaultCompare)
+	template <typename Compare = std::less<Type>>
+	void HeapifyDown(size_t _Index, Compare _Comp = Compare{})
 	{
 		// 당연히 Size를 넘는 Index가 들어오면 안된다.
 		assert(_Index < Size);
@@ -340,11 +340,11 @@ public:
 			size_t RightChild = HeapRightChild(_Index);
 
 			// Size를 넘지 않고 _Comp를 만족하는 자식이 있는가?
-			if (LeftChild < Size && _Comp(Arr[LeftChild], Arr[Best]))
+			if (LeftChild < Size && _Comp(Arr[Best], Arr[LeftChild]))
 			{
 				Best = LeftChild;
 			}
-			if (RightChild < Size && _Comp(Arr[RightChild], Arr[Best]))
+			if (RightChild < Size && _Comp(Arr[Best], Arr[RightChild]))
 			{
 				Best = RightChild;
 			}
@@ -356,15 +356,15 @@ public:
 			}
 
 			// 있다면 둘의 값을 바꾼다.
-			Utility::Swap(Arr[_Index], Arr[Best]);
+			Utility::Swap(Arr[Best], Arr[_Index]);
 			// 바뀐 자식으로 다시 Heapify.
 			_Index = Best;
 		}
 	}
 
 	// 배열을 완전히 Heap으로 만들어 준다.
-	template <typename Compare = bool(*)(const Type&, const Type&)>
-	void BuildHeap(Compare _Comp = Utility::DefaultCompare)
+	template <typename Compare = std::less<Type>>
+	void BuildHeap(Compare _Comp = Compare{})
 	{
 		assert(_Comp);
 
@@ -384,8 +384,8 @@ public:
 	// 힙 구조가 깨지지 않게 정리한다.
 	// 배열은 이미 힙 구조라고 가정한다.
 	// 당연히 _Comp는 힙화 할때와 같은 함수 기능으로 사용자가 넣어야 한다.
-	template <typename Compare = bool(*)(const Type&, const Type&)>
-	void HeapPush(const Type& _Item, Compare _Comp = Utility::DefaultCompare)
+	template <typename Compare = std::less<Type>>
+	void HeapPush(const Type& _Item, Compare _Comp = Compare{})
 	{
 		assert(_Comp);
 		
@@ -396,9 +396,9 @@ public:
 		while (CurIndex != 0)
 		{
 			size_t Parent = HeapParent(CurIndex);
-			if (_Comp(Arr[CurIndex], Arr[Parent]))
+			if (_Comp(Arr[Parent], Arr[CurIndex]))
 			{
-				Utility::Swap(Arr[CurIndex], Arr[Parent]);
+				Utility::Swap(Arr[Parent], Arr[CurIndex]);
 				CurIndex = Parent;
 			}
 			else
@@ -408,8 +408,8 @@ public:
 		}
 	}
 
-	template <typename Compare = bool(*)(const Type&, const Type&)>
-	void HeapPush(Type&& _Item, Compare _Comp = Utility::DefaultCompare)
+	template <typename Compare = std::less<Type>>
+	void HeapPush(Type&& _Item, Compare _Comp = Compare{})
 	{
 		assert(_Comp);
 
@@ -420,9 +420,9 @@ public:
 		while (CurIndex != 0)
 		{
 			size_t Parent = HeapParent(CurIndex);
-			if (_Comp(Arr[CurIndex], Arr[Parent]))
+			if (_Comp(Arr[Parent], Arr[CurIndex]))
 			{
-				Utility::Swap(Arr[CurIndex], Arr[Parent]);
+				Utility::Swap(Arr[Parent], Arr[CurIndex]);
 				CurIndex = Parent;
 			}
 			else
@@ -433,8 +433,8 @@ public:
 	}
 
 	// 하나 빼줘.
-	template <typename Compare = bool(*)(const Type&, const Type&)>
-	void HeapPop(Compare _Comp = Utility::DefaultCompare)
+	template <typename Compare = std::less<Type>>
+	void HeapPop(Compare _Comp = Compare{})
 	{
 		assert(Size);
 
@@ -444,6 +444,7 @@ public:
 		HeapifyDown(0, _Comp);
 	}
 
+private:
 	static size_t HeapParent(size_t _Index) noexcept
 	{
 		// _Index는 0이 아니어야 한다. 들어오면 죽이겠다.

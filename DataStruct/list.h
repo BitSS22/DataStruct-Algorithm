@@ -220,7 +220,7 @@ public:
 #endif
 	}
 	template<typename... Types>
-	Type& EmplaceBack(Types... _Items)
+	Type& EmplaceBack(Types&&... _Items)
 	{
 		Node* NewNode = new Node(Node::Emplace_Flag(), Utility::Forward<Types>(_Items)...);
 

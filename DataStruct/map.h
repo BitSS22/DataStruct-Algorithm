@@ -8,7 +8,7 @@
 //using Type2 = int;
 //using Compare = bool(*)(const int&, const int&);
 
-template <typename Type1, typename Type2, typename Compare = bool(*)(const Type1&, const Type1&)>
+template <typename Type1, typename Type2, typename Compare = std::less<Type1>>
 class map
 {
 public:
@@ -243,8 +243,7 @@ public:
 	};
 
 public:
-	map()
-		: Comp(Utility::DefaultCompare<Type1>) {}
+	map() {}
 	map(Compare _Comp)
 		: Comp(_Comp) {}
 	~map()
@@ -261,7 +260,7 @@ public:
 
 private:
 	Node* Root = nullptr;
-	Compare Comp;
+	Compare Comp = Compare{};
 	size_t Size = 0;
 
 private:
@@ -349,14 +348,14 @@ public:
 		while (CurNode != nullptr)
 		{
 			ParentNode = CurNode;
-			if ((*Comp)(CurNode->Data.Key, _Item.Key))
+			if (Comp(CurNode->Data.Key, _Item.Key))
 			{
 				CurNode = CurNode->RightChild;
 				IsDownLeft = false;
 			}
 			// 서로 서로 작지 않다 == 같다.
 			// 사용자 key가 operator==을 정의할 필요가 없다.
-			else if (false == (*Comp)(CurNode->Data.Key, _Item.Key) && false == (*Comp)(_Item.Key, CurNode->Data.Key))
+			else if (false == Comp(CurNode->Data.Key, _Item.Key) && false == Comp(_Item.Key, CurNode->Data.Key))
 			{
 				// 같으면 이미 존재하는 Key에 대한 Iterator 반환.
 				return Iterator(this, CurNode);
@@ -393,13 +392,13 @@ public:
 		while (CurNode != nullptr)
 		{
 			// 결과를 한번 받아서 재사용.
-			bool LessLeft = (*Comp)(CurNode->Data.Key, _Key);
+			bool LessLeft = Comp(CurNode->Data.Key, _Key);
 
 			if (LessLeft)
 			{
 				CurNode = CurNode->RightChild;
 			}
-			else if (false == LessLeft && false == (*Comp)(_Key, CurNode->Data.Key))
+			else if (false == LessLeft && false == Comp(_Key, CurNode->Data.Key))
 			{
 				// 찾았다.
 				break;

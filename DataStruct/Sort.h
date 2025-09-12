@@ -4,8 +4,8 @@
 #include "Utility.h"
 
 // Debug def
-typedef bool(*Compare)(const int&, const int&);
-typedef int Type;
+// using Type = int;
+// using Compare = std::less<Type>;
 
 namespace Sort
 {
@@ -18,7 +18,7 @@ namespace Sort
 
 #pragma endregion
 #pragma region Bubble
-	template <typename Type, typename Compare>
+	template <typename Type, typename Compare = std::less<Type>>
 	void BubbleSort(Type _Arr[], size_t _Size, Compare _Comp) noexcept
 	{
 		// 남은 원소 1 이하 == return
@@ -42,7 +42,7 @@ namespace Sort
 	}
 #pragma endregion
 #pragma region Insert
-	template <typename Type, typename Compare>
+	template <typename Type, typename Compare = std::less<Type>>
 	void InsertSort(Type _Arr[], size_t _Size, Compare _Comp) noexcept
 	{
 		// 첫번째 원소는 정렬 된 것으로 취급
@@ -70,7 +70,7 @@ namespace Sort
 	}
 #pragma endregion
 #pragma region Selection
-	template <typename Type, typename Compare>
+	template <typename Type, typename Compare = std::less<Type>>
 	void SelectionSort(Type _Arr[], size_t _Size, Compare _Comp) noexcept
 	{
 		// 모든 원소 순회
@@ -101,7 +101,7 @@ namespace Sort
 	}
 #pragma endregion
 #pragma region Merge
-	template <typename Type, typename Compare>
+	template <typename Type, typename Compare = std::less<Type>>
 	class MergeClass
 	{
 	public:
@@ -194,7 +194,7 @@ namespace Sort
 		}
 	};
 
-	template <typename Type, typename Compare>
+	template <typename Type, typename Compare = std::less<Type>>
 	void MergeSort(Type _Arr[], size_t _Size, Compare _Comp) noexcept
 	{
 		// Size 값이 1 이하면 할 필요도 없다.
@@ -266,7 +266,7 @@ namespace Sort
 
 	// Insert 함수에서 긁어왔다.
 	// ShellSort는 결국 InsertSort의 반복.
-	template <typename Type, typename Compare>
+	template <typename Type, typename Compare = std::less<Type>>
 	void ShellSort(Type _Arr[], size_t _Size, Compare _Comp) noexcept
 	{
 		// 배열 크기 1 이하면 정렬할 필요도 없다.
