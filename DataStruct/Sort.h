@@ -19,12 +19,12 @@ namespace Sort
 #pragma endregion
 #pragma region Bubble
 	template <typename Type, typename Compare = std::less<Type>>
-	void BubbleSort(Type _Arr[], size_t _Size, Compare _Comp) noexcept
+	void BubbleSort(Type _Arr[], size_t _Size, Compare _Comp = Compare{}) noexcept
 	{
 		// 남은 원소 1 이하 == return
 		while (_Size > 1)
 		{
-			// 정렬이 일어났는지를 체크해 최적화 할 수 있겠지만, 안하겠다.
+			// 정렬이 일어났는지를 체크해 최적화 할 수 있겠지만, 안하겠다. ex) bool Sorting = false;
 			for (size_t i = 0; i < _Size - 1; ++i)
 			{
 				// 다음 원소와 현재 원소 비교, true == Swap
@@ -35,15 +35,10 @@ namespace Sort
 			--_Size;
 		}
 	}
-	template <typename Type>
-	void BubbleSort(Type _Arr[], size_t _Size) noexcept
-	{
-		BubbleSort(_Arr, _Size, Utility::DefaultCompare<Type>);
-	}
 #pragma endregion
 #pragma region Insert
 	template <typename Type, typename Compare = std::less<Type>>
-	void InsertSort(Type _Arr[], size_t _Size, Compare _Comp) noexcept
+	void InsertSort(Type _Arr[], size_t _Size, Compare _Comp = Compare{}) noexcept
 	{
 		// 첫번째 원소는 정렬 된 것으로 취급
 		for (size_t i = 1; i < _Size; ++i)
@@ -63,15 +58,10 @@ namespace Sort
 			_Arr[Iter] = Utility::Move(Inst);
 		}
 	}
-	template <typename Type>
-	void InsertSort(Type _Arr[], size_t _Size) noexcept
-	{
-		InsertSort(_Arr, _Size, Utility::DefaultCompare<Type>);
-	}
 #pragma endregion
 #pragma region Selection
 	template <typename Type, typename Compare = std::less<Type>>
-	void SelectionSort(Type _Arr[], size_t _Size, Compare _Comp) noexcept
+	void SelectionSort(Type _Arr[], size_t _Size, Compare _Comp = Compare{}) noexcept
 	{
 		// 모든 원소 순회
 		for (size_t i = 0; i < _Size; ++i)
@@ -93,11 +83,6 @@ namespace Sort
 				Utility::Swap(_Arr[i], _Arr[FindIndex]);
 			}
 		}
-	}
-	template <typename Type>
-	void SelectionSort(Type _Arr[], size_t _Size) noexcept
-	{
-		SelectionSort(_Arr, _Size, Utility::DefaultCompare<Type>);
 	}
 #pragma endregion
 #pragma region Merge
@@ -195,7 +180,7 @@ namespace Sort
 	};
 
 	template <typename Type, typename Compare = std::less<Type>>
-	void MergeSort(Type _Arr[], size_t _Size, Compare _Comp) noexcept
+	void MergeSort(Type _Arr[], size_t _Size, Compare _Comp = Compare{}) noexcept
 	{
 		// Size 값이 1 이하면 할 필요도 없다.
 		if (1 >= _Size)
@@ -252,11 +237,6 @@ namespace Sort
 		MergeClass<Type, Compare>::Buffer = nullptr;
 		MergeClass<Type, Compare>::CompPtr = nullptr;
 	}
-	template <typename Type>
-	void MergeSort(Type _Arr[], size_t _Size) noexcept
-	{
-		MergeSort(_Arr, _Size, Utility::DefaultCompare<Type>);
-	}
 
 #pragma endregion
 #pragma region Shell
@@ -267,7 +247,7 @@ namespace Sort
 	// Insert 함수에서 긁어왔다.
 	// ShellSort는 결국 InsertSort의 반복.
 	template <typename Type, typename Compare = std::less<Type>>
-	void ShellSort(Type _Arr[], size_t _Size, Compare _Comp) noexcept
+	void ShellSort(Type _Arr[], size_t _Size, Compare _Comp = Compare{}) noexcept
 	{
 		// 배열 크기 1 이하면 정렬할 필요도 없다.
 		if (2 > _Size)
@@ -303,14 +283,80 @@ namespace Sort
 			++Ciura;
 		}
 	}
-	template <typename Type>
-	void ShellSort(Type _Arr[], size_t _Size) noexcept
-	{
-		ShellSort(_Arr, _Size, Utility::DefaultCompare<Type>);
-	}
 #pragma endregion
 #pragma region Heap
-	void HeapSort(Type _Arr[], size_t Size);
+	// 만들어놓은 Heap 알고리즘 그대로 가져와야겠다.
+	// 정적 배열에 맞게 코드 그냥 살짝만 바꾼다.
+	template <typename Type, typename Compare = std::less<Type>>
+	void HeapifyDown(Type _Arr[], size_t _Size, size_t _Index, Compare _Comp = Compare{})
+	{
+		if (_Size < 2)
+		{
+			return;
+		}
+
+		assert(_Index < _Size);
+
+		while (true)
+		{
+			size_t Best = _Index;
+			size_t LeftChild = _Index * 2 + 1;
+			size_t RightChild = _Index * 2 + 2;
+
+			if (LeftChild < _Size && _Comp(_Arr[Best], _Arr[LeftChild]))
+			{
+				Best = LeftChild;
+			}
+			if (RightChild < _Size && _Comp(_Arr[Best], _Arr[RightChild]))
+			{
+				Best = RightChild;
+			}
+
+			if (Best == _Index)
+			{
+				break;
+			}
+
+			Utility::Swap(_Arr[Best], _Arr[_Index]);
+			_Index = Best;
+		}
+	}
+
+	template <typename Type, typename Compare = std::less<Type>>
+	void BuildHeap(Type _Arr[], size_t _Size, Compare _Comp = Compare{})
+	{
+		if (_Size < 2)
+		{
+			return;
+		}
+
+		for (size_t i = _Size / 2; i > 0; --i)
+		{
+			HeapifyDown(_Arr, _Size, i - 1, _Comp);
+		}
+	}
+
+	template <typename Type, typename Compare = std::less<Type>>
+	void HeapSort(Type _Arr[], size_t _Size, Compare _Comp = Compare{})
+	{
+		if (_Size < 2)
+		{
+			return;
+		}
+
+		// 배열을 힙화 시킨다.
+		BuildHeap(_Arr, _Size, _Comp);
+
+		// 남은 배열 크기가 1이 될때까지.
+		while (_Size > 1)
+		{
+			// 마지막 원소와 자리를 바꾼다.
+			Utility::Swap(_Arr[0], _Arr[--_Size]);
+			// 맨 처음으로 온 원소를 다시 힙 구조를 맞춘다.
+			HeapifyDown(_Arr, _Size, 0, _Comp);
+		}
+	}
+
 #pragma endregion
 #pragma region Quick
 	void QuickSort(Type _Arr[], size_t Size);
