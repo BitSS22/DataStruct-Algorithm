@@ -408,6 +408,30 @@ public:
 		}
 	}
 
+	template <typename Compare = bool(*)(const Type&, const Type&)>
+	void HeapPush(Type&& _Item, Compare _Comp = Utility::DefaultCompare)
+	{
+		assert(_Comp);
+
+		PushBack(Utility::Forward(_Item));
+
+		size_t CurIndex = Size - 1;
+
+		while (CurIndex != 0)
+		{
+			size_t Parent = HeapParent(CurIndex);
+			if (_Comp(Arr[CurIndex], Arr[Parent]))
+			{
+				Utility::Swap(Arr[CurIndex], Arr[Parent]);
+				CurIndex = Parent;
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+
 	// ÇÏ³ª »©Áà.
 	template <typename Compare = bool(*)(const Type&, const Type&)>
 	void HeapPop(Compare _Comp = Utility::DefaultCompare)
