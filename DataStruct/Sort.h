@@ -367,6 +367,9 @@ namespace Sort
 			return;
 		}
 
+		// 일단 피벗을 정한다!
+		// 
+		size_t Pivot = 0;
 	}
 #pragma endregion
 #pragma region Radix
