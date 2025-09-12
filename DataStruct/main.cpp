@@ -42,6 +42,40 @@ int main()
 	// Memory Leak Check
 	_CrtSetDbgFlag(_CRTDBG_LEAK_CHECK_DF | _CRTDBG_ALLOC_MEM_DF);
 	
+	priority_queue<int> q = {};
+
+	q.Push(7);
+	q.Push(7);
+	q.Push(3);
+	q.Push(1);
+	q.Push(8);
+	q.Push(9);
+
+	size_t size = q.GetSize();
+
+	for (size_t i = 0; i < size; ++i)
+	{
+		int value = q.Top();
+		q.Pop();
+	}
+
+	vector<int> v = {};
+
+	v.PushBack(66);
+	v.PushBack(1342);
+	v.PushBack(44);
+	v.PushBack(1);
+	v.PushBack(0);
+	v.PushBack(3333);
+	v.PushBack(2222);
+
+	v.BuildHeap();
+
+	for (size_t i = 0; i < v.GetSize(); ++i)
+	{
+		std::cout << v[i] << " ";
+	}
+
 	// SortTest();
 }
 

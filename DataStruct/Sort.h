@@ -4,8 +4,8 @@
 #include "Utility.h"
 
 // Debug def
-// using Type = int;
-// using Compare = std::less<Type>;
+ using Type = int;
+ using Compare = std::less<Type>;
 
 namespace Sort
 {

@@ -322,16 +322,14 @@ public:
 	template <typename Compare = std::less<Type>>
 	void HeapifyDown(size_t _Index, Compare _Comp = Compare{})
 	{
-		// 당연히 Size를 넘는 Index가 들어오면 안된다.
-		assert(_Index < Size);
-		// 비교 함수 왜 안줘.
-		assert(_Comp);
-
 		// 배열 갯수가 1가 이하인 배열은 이미 정렬 되었다고 볼 수 있다.
 		if (Size < 2)
 		{
 			return;
 		}
+
+		// 당연히 Size를 넘는 Index가 들어오면 안된다.
+		assert(_Index < Size);
 
 		while (true)
 		{
@@ -366,8 +364,6 @@ public:
 	template <typename Compare = std::less<Type>>
 	void BuildHeap(Compare _Comp = Compare{})
 	{
-		assert(_Comp);
-
 		if (Size < 2)
 		{
 			return;
@@ -386,9 +382,7 @@ public:
 	// 당연히 _Comp는 힙화 할때와 같은 함수 기능으로 사용자가 넣어야 한다.
 	template <typename Compare = std::less<Type>>
 	void HeapPush(const Type& _Item, Compare _Comp = Compare{})
-	{
-		assert(_Comp);
-		
+	{		
 		PushBack(_Item);
 
 		size_t CurIndex = Size - 1;
@@ -411,9 +405,7 @@ public:
 	template <typename Compare = std::less<Type>>
 	void HeapPush(Type&& _Item, Compare _Comp = Compare{})
 	{
-		assert(_Comp);
-
-		PushBack(Utility::Forward(_Item));
+		PushBack(Utility::Forward<Type>(_Item));
 
 		size_t CurIndex = Size - 1;
 
@@ -436,8 +428,6 @@ public:
 	template <typename Compare = std::less<Type>>
 	void HeapPop(Compare _Comp = Compare{})
 	{
-		assert(Size);
-
 		Utility::Swap(Arr[0], Arr[Size - 1]);
 		PopBack();
 
