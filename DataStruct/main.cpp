@@ -2,6 +2,7 @@
 #include <vector>
 #include <list>
 #include <map>
+#include <queue>
 
 #include <utility>
 
@@ -15,6 +16,7 @@
 #include "vector.h"
 #include "list.h"
 #include "map.h"
+#include "queue.h"
 
 // Make Algorithm
 #include "Utility.h"
@@ -38,31 +40,7 @@ int main()
 {
 	// Memory Leak Check
 	_CrtSetDbgFlag(_CRTDBG_LEAK_CHECK_DF | _CRTDBG_ALLOC_MEM_DF);
-	std::map<int, int> mm = {};
 	
-	map<int,int> m = {};
-
-	m.Insert(map<int, int>::Pair(7, 7));
-
-	m.Insert(map<int, int>::Pair(3, 3));
-	m.Insert(map<int, int>::Pair(11, 11));
-
-	m.Insert(map<int, int>::Pair(1, 1));
-	m.Insert(map<int, int>::Pair(5, 5));
-	m.Insert(map<int, int>::Pair(9, 9));
-	m.Insert(map<int, int>::Pair(13, 13));
-
-
-	m.Insert(map<int, int>::Pair(13, 0));
-
-	auto iter = m.Find(7);
-	m.Erase(iter);
-
-	for (map<int, int>::Iterator iter = m.Begin(); iter != m.End(); ++iter)
-	{
-		std::cout << iter->Key << " " << iter->Value << std::endl;
-	}
-
 	// SortTest();
 }
 
