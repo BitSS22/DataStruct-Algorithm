@@ -359,6 +359,101 @@ namespace Sort
 
 #pragma endregion
 #pragma region Quick
+	// QuickSort Logic.
+	// 1. Pivot을 하나 정한다.
+	// 2. 양쪽에서 동시에 값을 읽는다.
+	// 3. Pivot보다 작은값, Pivot보다 큰 값을 찾았다면 둘의 위치를 바꾼다.
+	// 4. 읽는 두개의 포인터가 만난다면 Pivot과 만난 위치를 바꾼다.
+	// 5. Pivot을 제외한 두 배열에 대해 1~4를 정렬 될 때 까지 반복한다.
+	// 
+	// 만약 피봇이 최소값, 최대값처럼 치우친 값이라면 정렬의 효율이 많이 떨어질 수 있다.
+	// Pivot을 시작, 중간, 끝에서 세개를 잡고 중간 값을 사용하는 Median of Three 같은 방법이 존재하며,
+	// InsertSort를 섞어 쓰는 방법도 존재한다.
+	// Partition을 크다, 같다, 작다로 세개로 나누는 QuickSort는 중복키가 많을때 효율적.
+	// Median of Three만 적용해서 구현 해 본다.
+	// 
+	// _Low, _High는 유효한 인덱스임을 보장해야 한다.
+	template <typename Type, typename Compare = std::less<Type>>
+	bool QuickSortMedianOfThree(Type _Arr[], size_t _Low, size_t _High, Compare _Comp = Compare{})
+	{
+		// 말도 안돼.
+		assert(_Low <= _High);
+
+		// 정렬 해야 할 원소의 크기가 2개 이하라면 그냥 냅둔다..
+		if (_High - _Low < 2)
+		{
+			// 성공 여부를 반환 한다.
+			return false;
+		}
+
+		// 중앙 인덱스를 찾는다.
+		size_t _Mid = (_Low + _High) / 2;
+
+		// 각각의 값을 받는다.
+		Type& Low = _Arr[_Low];
+		Type& Mid = _Arr[_Mid];
+		Type& High = _Arr[_High];
+
+		// 각각 값을 비교해 Low < Mid < High를 만족 시킨다.
+		if (_Comp(Mid, Low))
+			Utility::Swap(Mid, Low);
+		if (_Comp(High, Low))
+			Utility::Swap(High, Low);
+		if (_Comp(High, Mid))
+			Utility::Swap(High, Mid);
+
+		// Low 다음 인덱스의 값과 Mid 값을 교체.
+		Utility::Swap(_Arr[_Low + 1], _Arr[_Mid]);
+
+		return true;
+	}
+
+	template <typename Type, typename Compare = std::less<Type>>
+	void QuickSortPartition(Type _Arr[], size_t _Low, size_t _High, Compare _Comp = Compare{})
+	{
+		// 2개 이하
+		if (!QuickSortMedianOfThree(_Arr, _Low, _High, _Comp))
+		{
+			// InsertSort로 정리한다.
+			if (_High - _Low > 0)
+				InsertSort(_Arr + _Low, _High - _Low + 1, _Comp);
+			return;
+		}
+
+		Type& Pivot = _Arr[_Low + 1];
+		size_t Low = _Low + 2;
+		size_t High = _High - 1;
+
+		// 3개 이상이면 정렬한다.
+		while (true)
+		{
+			// 양쪽에서 알맞은 값을 찾는다.
+			// 여기서 Low < Mid < High가 보장 되었기 때문에 while 탈출 조건은 항상 존재.
+			while (_Comp(_Arr[Low], Pivot))
+			{
+				++Low;
+			}
+			while (_Comp(Pivot, _Arr[High]))
+			{
+				--High;
+			}
+			
+			// 교차 했다면 break.
+			if (Low >= High)
+				break;
+
+			// 그게 아니라면 자리를 바꿀 원소가 존재한다.
+			Utility::Swap(_Arr[Low++], _Arr[High--]);
+		}
+
+		// 마지막으로 만난 중앙과 Pivot의 값을 바꾼다.
+		Utility::Swap(Pivot, _Arr[High]);
+
+		// 분할 된 두개의 파티션을 다시 QuickSorting 한다. 여기서 Pivot은 이미 정렬 되었다.
+		QuickSortPartition(_Arr, _Low, High - 1, _Comp);
+		QuickSortPartition(_Arr, High + 1, _High, _Comp);
+	}
+
 	template <typename Type, typename Compare = std::less<Type>>
 	void QuickSort(Type _Arr[], size_t _Size, Compare _Comp = Compare{})
 	{
@@ -367,9 +462,7 @@ namespace Sort
 			return;
 		}
 
-		// 일단 피벗을 정한다!
-		// 
-		size_t Pivot = 0;
+		QuickSortPartition(_Arr, 0, _Size - 1, _Comp);
 	}
 #pragma endregion
 #pragma region Radix

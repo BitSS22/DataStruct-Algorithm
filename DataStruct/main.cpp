@@ -89,7 +89,7 @@ void SortTest()
 		auto Start = std::chrono::steady_clock::now();
 
 		// Sorting
-		Sort::HeapSort(Arr, ARRSIZE);
+		Sort::QuickSort(Arr, ARRSIZE);
 		//Sort::ShellSort(Arr, ARRSIZE, [](const int& _Left, const int& _Right) noexcept -> bool { return _Left > _Right; });
 
 		// Time End
