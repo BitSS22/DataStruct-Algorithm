@@ -468,15 +468,92 @@ namespace Sort
 	}
 #pragma endregion
 #pragma region Radix
-	template <typename Type, typename Compare = std::less<Type>>
-	void RadixSort(Type _Arr[], size_t _Size, Compare _Comp = Compare{})
+	// RadixSort Logic
+	// 1. Type은 정수형으로 변환이 되어야 한다.
+	// 2. 같은 크기의 배열 (혹으
+	// 3. key에 따라 적절한 배열의 Index로 삽입한다.
+	// 4. 적절하게 들어간 배열을 순서대로 꺼내 배치한다.
+	// 5. 3~4를 반복한다.
+
+	// 재밌게도 비교 연산을 직접적으로 하지 않는다. 따라서 비교 함수가 필요하진 않다.
+	// 기본적으로 Index를 기반으로 하기 떄문에, 값 자체가 정수형으로 변환이 되어야 한다. (즉, a < b와 일관성을 만족하는 해쉬 함수가 필요하다.)
+	// 따라서 사용자 정의 자료형에 대해서는 사용자가 적절한 정수형으로 반환할 수 있는 함수를 받겠다.
+	// 만약 nullptr이라면, Type이 정수형이라고 가정하고 진행한다.
+	// 자릿수를 알기 위해 결국 최댓값을 찾아야 하는데, 그럴 바에 그냥 인자로 최대값을 받겠다.
+
+	// 음수가 포함 된 배열과 내림차순 정렬은 고려하지 않는다. (음수 값을 허용하려면 음수 배열도 따로 만들거나 값을 밀어줘야 할듯.)
+
+	template <typename Type, typename HashFunction = size_t(*)(const Type&)>
+	void CountingSort(Type _Arr[], size_t _Size, size_t _DigitPivot, HashFunction _HashFunc = nullptr)
 	{
 		if (_Size < 2)
 		{
 			return;
 		}
 
+		vector<Type> Buffer = {};
+		Buffer.Resize(_Size);
 
+		size_t Count[10] = {};
+
+		size_t DecimalValue = 1;
+
+		for (size_t i = 0; i < _DigitPivot; ++i)
+		{
+			DecimalValue *= 10;
+		}
+
+		// 각각 들어갈 갯수가 몇개씩인지 센다.
+		for (size_t i = 0; i < _Size; ++i)
+		{
+			size_t Value = _HashFunc ? _HashFunc(_Arr[i]) : _Arr[i];
+			Value = Value / DecimalValue % 10;
+			++Count[Value];
+		}
+
+		// 배열에 들어갈 인덱스 위치를 잡아준다.
+		for (size_t i = 10; i > 0; --i)
+		{
+			size_t sum = 0;
+			for (size_t j = 0; j < i - 1; ++j)
+			{
+				sum += Count[j];
+			}
+			Count[i - 1] = sum;
+		}
+
+		for (size_t i = 0; i < _Size; ++i)
+		{
+			// 자릿수를 구한다.
+			size_t Num = _HashFunc ? Utility::DigitNumber(_HashFunc(_Arr[i]), _DigitPivot) : Utility::DigitNumber(_Arr[i], _DigitPivot);
+			Buffer[Count[Num]] = _Arr[i];
+			++Count[Num];
+		}
+
+		for (size_t i = 0; i < _Size; ++i)
+		{
+			_Arr[i] = Buffer[i];
+		}
+	}
+
+	template <typename Type, typename HashFunction = size_t(*)(const Type&)>
+	void RadixSort(Type _Arr[], size_t _Size, Type _MaxValue, HashFunction _HashFunc = nullptr)
+	{
+		if (_Size < 2)
+		{
+			return;
+		}
+
+		// 인덱스 자릿수별로 구분해 넣을 공간이 필요하다.
+		vector<Type> Buffer = {};
+		
+		// 가장 큰 값에서 반복 횟수를 찾아낸다.
+		size_t MaxDigit = _HashFunc ? Utility::UnsignedDigitCount(_HashFunc(_MaxValue)) : Utility::UnsignedDigitCount(_MaxValue);
+
+		for (size_t i = 0; i < MaxDigit; ++i)
+		{
+			CountingSort(_Arr, _Size, i, _HashFunc);
+		}
 	}
 #pragma endregion
 };

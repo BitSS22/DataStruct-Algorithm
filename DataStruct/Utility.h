@@ -78,8 +78,8 @@ namespace Utility
 	}
 
 	// 정수 타입만 받을거야.
-	template<std::integral Type>
-	constexpr size_t GetPrintDigit(Type _Value) noexcept
+	template<std::integral Integer>
+	constexpr size_t PrintDigitCount(Integer _Value) noexcept
 	{
 		// 0은 숫자 0이니 1자릿수 아닐까?
 		if (0 == _Value)
@@ -89,6 +89,35 @@ namespace Utility
 		// 음수의 -기호도 자릿수로 세겠다.
 		if (0 > _Value)
 			++Count;
+
+		while (_Value != 0)
+		{
+			_Value /= 10;
+			++Count;
+		}
+
+		return Count;
+	}
+
+	// RadixSort에서 쓸 함수를 여기 만들겠다.
+	template<std::integral Integer>
+	constexpr size_t DigitNumber(Integer _Value, size_t _DecimalDigit_Zerobase) noexcept
+	{
+		// CutValue로 뽑아 낼 자릿수를 잡는다.
+		size_t CutValue = 1;
+		for (size_t i = 0; i < _DecimalDigit_Zerobase; ++i)
+		{
+			CutValue *= 10;
+		}
+
+		return _Value / CutValue % 10;
+	}
+
+	// 출력이 아닌 순수하게 자릿수를 찾는다 양수만 받겠다. 0은 0 return.
+	template<std::integral Integer>
+	constexpr size_t UnsignedDigitCount(Integer _Value) noexcept
+	{
+		size_t Count = 0;
 
 		while (_Value != 0)
 		{

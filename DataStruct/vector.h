@@ -218,6 +218,55 @@ public:
 		Capacity = _NewCapacity;
 	}
 
+	// 제대로 동작만 하게 하자.
+	void Resize(size_t _Size)
+	{
+		if (Capacity < _Size)
+		{
+			Reserve(_Size);
+		}
+
+		if (_Size > Size)
+		{
+			for (size_t i = Size; i < _Size; ++i)
+			{
+				new(Arr + i) Type();
+			}
+		}
+		else
+		{
+			for (size_t i = _Size; i < Size; ++i)
+			{
+				std::destroy_at(Arr + i);
+			}
+		}
+		Size = _Size;
+	}
+
+	void Resize(size_t _Size, const Type& _Items)
+	{
+		if (Capacity < _Size)
+		{
+			Reserve(_Size);
+		}
+
+		if (_Size > Size)
+		{
+			for (size_t i = Size; i < _Size; ++i)
+			{
+				new(Arr + i) Type(_Items);
+			}
+		}
+		else
+		{
+			for (size_t i = _Size; i < Size; ++i)
+			{
+				std::destroy_at(Arr + i);
+			}
+		}
+		Size = _Size;
+	}
+
 	// 맨 뒤에꺼 하나 지워줘
 	void PopBack() noexcept
 	{

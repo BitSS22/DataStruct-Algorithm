@@ -41,68 +41,82 @@ int main()
 {
 	// Memory Leak Check
 	_CrtSetDbgFlag(_CRTDBG_LEAK_CHECK_DF | _CRTDBG_ALLOC_MEM_DF);
-	
+
 	SortTest();
 }
 
 void SortTest()
 {
 	// Arr Option
-	constexpr size_t ARRSIZE = 100;
-	constexpr size_t CarriageReturnCount = 20;
-	constexpr size_t Digit = Utility::GetPrintDigit(ARRSIZE);
+	constexpr size_t ARRSIZE = 100000;
+	constexpr size_t CarriageReturnCount = 50;
+	constexpr size_t Digit = Utility::PrintDigitCount(ARRSIZE);
+	constexpr bool PrintNum = false;
 	
 	// Escape to InputKey == ESC
 	int InputKey = 0;
 	constexpr int EscapeKey = 27;
-	
+
+	// MakeArr
+	int* Arr = new int[ARRSIZE];
+	for (size_t i = 0; i < ARRSIZE; ++i)
+	{
+		Arr[i] = static_cast<int>(i);
+	}
+
 	// GetTimes
 	std::vector<double> Elapseds = {};
 
 	while (InputKey != EscapeKey)
 	{
-		// MakeArr
-		int Arr[ARRSIZE] = {};
-		for (size_t i = 0; i < ARRSIZE; ++i)
-		{
-			Arr[i] = static_cast<int>(i);
-		}
-
 		// Shuffle
-		ArrShuffle(Arr);
+		ArrShuffle(Arr, ARRSIZE);
 
 		// Input
 		std::cout << "Case : " << Elapseds.size() + 1 << std::endl;
 
-		std::cout << "Shuffle Arr" << std::endl;
-		for (size_t i = 0; i < ARRSIZE; ++i)
+		if constexpr (PrintNum)
 		{
-			std::cout << std::setw(Digit) << Arr[i] << " ";
-			if (i % CarriageReturnCount == CarriageReturnCount - 1)
+			std::cout << "Shuffle Arr" << std::endl;
+			for (size_t i = 0; i < ARRSIZE; ++i)
 			{
-				std::cout << std::endl;
+				std::cout << std::setw(Digit) << Arr[i] << " ";
+				if (i % CarriageReturnCount == CarriageReturnCount - 1)
+				{
+					std::cout << std::endl;
+				}
 			}
+			std::cout << "\n";
 		}
-		std::cout << "\n";
 
 		// Time Start
 		auto Start = std::chrono::steady_clock::now();
 
 		// Sorting
-		Sort::QuickSort(Arr, ARRSIZE);
+		//Sort::BubbleSort(Arr, ARRSIZE);
+		//Sort::InsertSort(Arr, ARRSIZE);
+		//Sort::SelectionSort(Arr, ARRSIZE);
+		//Sort::MergeSort(Arr, ARRSIZE);
+		//Sort::ShellSort(Arr, ARRSIZE);
+		//Sort::HeapSort(Arr, ARRSIZE);
+		//Sort::QuickSort(Arr, ARRSIZE);
+		//Sort::RadixSort(Arr, ARRSIZE, static_cast<int>(ARRSIZE));
 		//Sort::ShellSort(Arr, ARRSIZE, [](const int& _Left, const int& _Right) noexcept -> bool { return _Left > _Right; });
 
 		// Time End
 		auto End = std::chrono::steady_clock::now();
 
 		// Output
-		std::cout << "Sort Arr" << std::endl;
-		for (size_t i = 0; i < ARRSIZE; ++i)
+		if constexpr (PrintNum)
 		{
-			std::cout << std::setw(Digit) << Arr[i] << " ";
-			if (i % CarriageReturnCount == CarriageReturnCount - 1)
+			std::cout << "Sort Arr" << std::endl;
+			for (size_t i = 0; i < ARRSIZE; ++i)
 			{
-				std::cout << std::endl;
+				std::cout << std::setw(Digit) << Arr[i] << " ";
+				if (i % CarriageReturnCount == CarriageReturnCount - 1)
+				{
+					std::cout << std::endl;
+				}
 			}
 		}
 
@@ -120,6 +134,7 @@ void SortTest()
 		system("cls");
 	}
 
+	delete[] Arr;
 	// Last Info
 	double Average = 0.;
 
