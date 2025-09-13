@@ -3,6 +3,7 @@
 #include <list>
 #include <map>
 #include <queue>
+#include <unordered_set>
 
 #include <utility>
 
@@ -41,6 +42,8 @@ int main()
 {
 	// Memory Leak Check
 	_CrtSetDbgFlag(_CRTDBG_LEAK_CHECK_DF | _CRTDBG_ALLOC_MEM_DF);
+
+	std::unordered_set<int> s;
 
 	SortTest();
 }

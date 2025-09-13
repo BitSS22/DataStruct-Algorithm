@@ -20,10 +20,13 @@
     <ClInclude Include="Shuffle.h">
       <Filter>Algorithm\Shuffle</Filter>
     </ClInclude>
-    <ClInclude Include="heap.h">
+    <ClInclude Include="queue.h">
       <Filter>DataStruct</Filter>
     </ClInclude>
-    <ClInclude Include="queue.h">
+    <ClInclude Include="priority_queue.h">
+      <Filter>DataStruct</Filter>
+    </ClInclude>
+    <ClInclude Include="unordered_set.h">
       <Filter>DataStruct</Filter>
     </ClInclude>
   </ItemGroup>
