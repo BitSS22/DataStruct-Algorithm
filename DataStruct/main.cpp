@@ -43,7 +43,14 @@ int main()
 	// Memory Leak Check
 	_CrtSetDbgFlag(_CRTDBG_LEAK_CHECK_DF | _CRTDBG_ALLOC_MEM_DF);
 
+	// iostream option
+	std::ios::sync_with_stdio(false);
+	std::cin.tie(0);
+	std::cout.tie(0);
+
 	std::unordered_set<int> s;
+
+	
 
 	SortTest();
 }
@@ -51,12 +58,12 @@ int main()
 void SortTest()
 {
 	// Arr Option
-	constexpr size_t ARRSIZE = 100000;
-	constexpr size_t CarriageReturnCount = 50;
+	constexpr size_t ARRSIZE = 10000;
+	constexpr size_t CarriageReturnCount = 30;
 	constexpr size_t Digit = Utility::PrintDigitCount(ARRSIZE);
-	constexpr bool PrintNum = false;
+	constexpr bool PrintNum = true;
 	
-	// Escape to InputKey == ESC
+	// Escape InputKey == ESC
 	int InputKey = 0;
 	constexpr int EscapeKey = 27;
 
@@ -67,7 +74,7 @@ void SortTest()
 		Arr[i] = static_cast<int>(i);
 	}
 
-	// GetTimes
+	// GetTime
 	std::vector<double> Elapseds = {};
 
 	while (InputKey != EscapeKey)
@@ -103,7 +110,7 @@ void SortTest()
 		//Sort::ShellSort(Arr, ARRSIZE);
 		//Sort::HeapSort(Arr, ARRSIZE);
 		//Sort::QuickSort(Arr, ARRSIZE);
-		//Sort::RadixSort(Arr, ARRSIZE, static_cast<int>(ARRSIZE));
+		Sort::RadixSort(Arr, ARRSIZE, static_cast<int>(ARRSIZE));
 		//Sort::ShellSort(Arr, ARRSIZE, [](const int& _Left, const int& _Right) noexcept -> bool { return _Left > _Right; });
 
 		// Time End
@@ -112,7 +119,7 @@ void SortTest()
 		// Output
 		if constexpr (PrintNum)
 		{
-			std::cout << "Sort Arr" << std::endl;
+			std::cout << "\nSort Arr" << std::endl;
 			for (size_t i = 0; i < ARRSIZE; ++i)
 			{
 				std::cout << std::setw(Digit) << Arr[i] << " ";
