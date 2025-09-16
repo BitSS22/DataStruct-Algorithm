@@ -49,10 +49,10 @@ private:
 	Equal Eq = std::equal_to<void>{};
 
 public:
-	bool ReAllocate(size_t _NewCapacity)
+	void ReAllocate(size_t _NewCapacity)
 	{
 		if (_NewCapacity <= Capacity)
-			return false;
+			return;
 
 		Type* NewBucket = nullptr;
 
@@ -69,5 +69,8 @@ public:
 	}
 
 private:
+	void ReHash(Type* _Table, size_t _Size)
+	{
 
+	}
 };
