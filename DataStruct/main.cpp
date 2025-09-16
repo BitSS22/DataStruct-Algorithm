@@ -50,7 +50,8 @@ int main()
 
 	std::unordered_set<int> s;
 
-	
+	std::hash<MyClass>;
+
 
 	SortTest();
 }

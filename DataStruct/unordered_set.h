@@ -2,12 +2,27 @@
 #include "Utility.h"
 #include "vector.h"
 
+// 필요한거 정리
+// raw 메모리 풀.
+// Size.
+// Capacity
+// hash collision 처리 (체이닝)
+// equal 동등성 비교
+// Hash 함수.
+
 using Type = int;
+using HashFunc = std::hash<Type>;
+using Equal = std::equal_to<void>;
 
 // 해쉬의 개념을 구현하기 위한 unordered_set.
-//template <typename Type>
+//template <typename Type, typename HashFunc = std::hash<Type>, typename Equal = std::equal_to<void>>
 class unordered_set
 {
+	enum class State : __int8
+	{
+		Empty, Occupied, Deleted
+	};
+
 public:
 	unordered_set() = default;
 	~unordered_set() = default;
@@ -21,65 +36,38 @@ public:
 
 private:
 	// 기본적으로 들어오는 값을 저장할 버킷(배열)이 필요할 것.
-	// 해시 충돌은 Chaining으로 해결해 본다.
+	// 해시 충돌은 선형탐사로 해결해 본다.
 	// 원소가 존재 하는지 접근하기 전 확인해야 한다. 별도의 데이터로 관리 해야 할 것 같다. => 비트 마스킹으로 64구간씩 체크 해본다.
 
-	Type* Bucket = nullptr;
-	vector<vector<Type>> Chain = {};
-	size_t* Check = {};
+	Type* Buckets = nullptr;
+	State* States = nullptr;
 
 	size_t Size = 0;
 	size_t Capacity = 0;
 
-	size_t(*HashFunc)(const Type&) = [](const Type& _Item) { return static_cast<size_t>(_Item); };
+	HashFunc Hash = std::hash<Type>{};
+	Equal Eq = std::equal_to<void>{};
 
 public:
-	// 계산 편의를 위해 크기는 2의 제곱수, 최소 64부터 한다.
 	bool ReAllocate(size_t _NewCapacity)
 	{
-		if (_NewCapacity < Capacity || _NewCapacity < Size || _NewCapacity < 64)
+		if (_NewCapacity <= Capacity)
 			return false;
 
-		size_t NewCapacity = 64;
-		if (_NewCapacity <= NewCapacity)
-			NewCapacity <<= 1;
+		Type* NewBucket = nullptr;
 
-		Type* OldBucket = Bucket;
-		size_t* OldCheck = Check;
-
-		// 새로운 메모리 할당.
-		Bucket = static_cast<Type*>(::operator new(sizeof(Type) * NewCapacity));
-		Check = static_cast<size_t*>(::operator new (sizeof(size_t) * (NewCapacity >> 4)));
-
-		if (OldCheck != nullptr)
+		if constexpr (alignof(Type) < alignof(std::max_align_t))
 		{
-			size_t CheckBit = Capacity >> 4;
-
-			for (size_t i = 0; i < CheckBit; ++i)
-			{
-				for (size_t j = 1, Loop = 0; Loop < sizeof(size_t); j <<= 1, ++Loop)
-				{
-					if (j & OldCheck[CheckBit])
-					{
-						// TODO. 새로운 위치로 복사하는 코드.
-
-						OldBucket[(CheckBit << 4) + Loop];
-					}
-				}
-			}
-			
+			NewBucket = static_cast<Type*>(::operator new(sizeof(Type) * _NewCapacity));
 		}
+		else
+		{
+			NewBucket = static_cast<Type*>(::operator new(sizeof(Type) * _NewCapacity, std::align_val_t(alignof(Type))));
+		}
+		
 
 	}
 
-	size_t GetHash(const Type& _Item)
-	{
-		return (Capacity - 1) & HashFunc(_Item);
-	}
-
-	bool Insert()
-	{
-
-	}
+private:
 
 };
