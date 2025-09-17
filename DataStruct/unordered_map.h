@@ -1,6 +1,7 @@
 #pragma once
+#include <memory>
+
 #include "Utility.h"
-#include "vector.h"
 
 // 필요한거 정리
 // raw 메모리 풀.
@@ -10,10 +11,10 @@
 // equal 동등성 비교
 // Hash 함수.
 
-using Type1 = int;
-using Type2 = int;
-using HashFunc = std::hash<Type1>;
-using Equal = std::equal_to<void>;
+// using Type1 = int;
+// using Type2 = int;
+// using HashFunc = std::hash<Type1>;
+// using Equal = std::equal_to<void>;
 
 // 해쉬의 개념을 구현하기 위한 unordered_set.
 template <typename Type1, typename Type2, typename HashFunc = std::hash<Type1>, typename Equal = std::equal_to<void>>
@@ -99,8 +100,8 @@ private:
 	size_t Size = 0;
 	size_t Capacity = 0;
 
-	HashFunc Hash = std::hash<Type1>{};
-	Equal Eq = std::equal_to<void>{};
+	HashFunc Hash = {};
+	Equal Eq = {};
 
 	float LoadFactor = 0.75f;
 
@@ -167,6 +168,8 @@ public:
 
 		size_t HashIndex = Hash(_Item.Key) % Capacity;
 		size_t i = HashIndex;
+		size_t Sentinel = static_cast<size_t>(-1);
+		size_t DIndex = Sentinel;
 
 		do
 		{
@@ -177,17 +180,28 @@ public:
 					Bucket[i].Value = _Item.Value;
 					return;
 				}
-
-				i = (i + 1) % Capacity;
-				continue;
+			}
+			else if (States[i] == State::Deleted)
+			{
+				if (DIndex == Sentinel)
+				{
+					DIndex = i;
+				}
+			}
+			else
+			{
+				if (DIndex != Sentinel)
+				{
+					i = DIndex;
+				}
+				new(Bucket + i) Pair(_Item);
+				States[i] = State::Occupied;
+				++Size;
+				return;
 			}
 
-			new(Bucket + i) Pair(_Item);
-			States[i] = State::Occupied;
-			++Size;
-			return;
-		}
-		while (i != HashIndex);
+			i = (i + 1) % Capacity;
+		} while (i != HashIndex);
 	}
 
 	void Insert(Pair&& _Item)
@@ -203,6 +217,8 @@ public:
 
 		size_t HashIndex = Hash(_Item.Key) % Capacity;
 		size_t i = HashIndex;
+		size_t Sentinel = static_cast<size_t>(-1);
+		size_t DIndex = Sentinel;
 
 		do
 		{
@@ -213,15 +229,27 @@ public:
 					Bucket[i].Value = Utility::Move(_Item.Value);
 					return;
 				}
-
-				i = (i + 1) % Capacity;
-				continue;
+			}
+			else if (States[i] == State::Deleted)
+			{
+				if (DIndex == Sentinel)
+				{
+					DIndex = i;
+				}
+			}
+			else
+			{
+				if (DIndex != Sentinel)
+				{
+					i = DIndex;
+				}
+				new(Bucket + i) Pair(Utility::Move(_Item));
+				States[i] = State::Occupied;
+				++Size;
+				return;
 			}
 
-			new(Bucket + i) Pair(Utility::Move(_Item));
-			States[i] = State::Occupied;
-			++Size;
-			return;
+			i = (i + 1) % Capacity;
 		} while (i != HashIndex);
 	}
 
@@ -291,6 +319,43 @@ public:
 		} while (i != HashIndex);
 
 		return nullptr;
+	}
+
+	bool Erase(const Type1& _Key)
+	{
+		assert(Capacity);
+		assert(Bucket);
+		assert(States);
+
+		size_t HashIndex = Hash(_Key) % Capacity;
+		size_t i = HashIndex;
+
+		do
+		{
+			switch (States[i])
+			{
+			case State::Occupied:
+				if (Eq(_Key, Bucket[i].Key))
+				{
+					std::destroy_at(Bucket + i);
+					States[i] = State::Deleted;
+					--Size;
+					return true;
+				}
+				[[fallthrough]];
+			case State::Deleted:
+				i = (i + 1) % Capacity;
+				continue;
+			case State::Empty:
+				return false;
+			default:
+				assert(!"Not Found state. Critical Error.");
+				break;
+			}
+
+		} while (i != HashIndex);
+
+		return false;
 	}
 
 private:
