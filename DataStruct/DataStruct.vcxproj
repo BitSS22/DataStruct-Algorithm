@@ -137,7 +137,7 @@
     <ClInclude Include="queue.h" />
     <ClInclude Include="Shuffle.h" />
     <ClInclude Include="Sort.h" />
-    <ClInclude Include="unordered_set.h" />
+    <ClInclude Include="unordered_map.h" />
     <ClInclude Include="Utility.h" />
     <ClInclude Include="vector.h" />
   </ItemGroup>
