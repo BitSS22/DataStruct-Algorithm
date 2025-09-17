@@ -3,7 +3,7 @@
 #include <list>
 #include <map>
 #include <queue>
-#include <unordered_set>
+#include <unordered_map>
 
 #include <utility>
 
@@ -48,10 +48,9 @@ int main()
 	std::cin.tie(0);
 	std::cout.tie(0);
 
-	std::unordered_set<int> s;
+	std::unordered_map<int, float> m;
 
-	std::hash<MyClass>;
-
+	m.find(0);
 
 	SortTest();
 }

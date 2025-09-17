@@ -54,7 +54,29 @@ public:
 
 public:
 	unordered_map() = default;
-	~unordered_map() = default;
+	~unordered_map()
+	{
+		for (size_t i = 0; i < Capacity; ++i)
+		{
+			if (States[i] == State::Occupied)
+			{
+				std::destroy_at(Bucket + i);
+			}
+		}
+
+		if constexpr (alignof(Pair) > alignof(std::max_align_t))
+		{
+			::operator delete(Bucket, std::align_val_t(alignof(Pair)));
+		}
+		else
+		{
+			::operator delete(Bucket);
+		}
+		
+		delete[] States;
+		Size = 0;
+		Capacity = 0;
+	};
 
 	unordered_map(const unordered_map& _Other) = delete;
 	unordered_map(unordered_map&& _Other) = delete;
@@ -77,12 +99,12 @@ private:
 	HashFunc Hash = std::hash<Type1>{};
 	Equal Eq = std::equal_to<void>{};
 
-	float LoadFactor = 0.7f;
+	float LoadFactor = 0.75f;
 
 public:
 	void ReAllocate(size_t _NewCapacity)
 	{
-		if (_NewCapacity <= Capacity)
+		if (_NewCapacity < Capacity)
 			return;
 
 		Pair* OldBucket = Bucket;
@@ -133,7 +155,9 @@ public:
 		assert(States);
 
 		if (IsThreshold())
+		{
 			ReAllocate(Capacity * 2);
+		}
 
 		size_t HashIndex = Hash(_Item.Key) % Capacity;
 		size_t i = HashIndex;
@@ -149,10 +173,9 @@ public:
 			new(Bucket + i) Pair(_Item);
 			States[i] = State::Occupied;
 			++Size;
-		} while (i != HashIndex);
-
-
-
+			return;
+		}
+		while (i != HashIndex);
 	}
 
 	void Insert(Pair&& _Item)
@@ -160,16 +183,70 @@ public:
 
 	}
 
-
-	Type2& Find()
+	bool Contains(const Type1& _Key) const
 	{
+		size_t HashIndex = Hash(_Key) % Capacity;
+		size_t i = HashIndex;
 
+		do
+		{
+			switch (States[i])
+			{
+			case State::Occupied:
+				if (Eq(_Key, Bucket[i].Key))
+				{
+					return true;
+				}
+				[[fallthrough]];
+			case State::Deleted:
+				(++i) % Capacity;
+				continue;
+			case State::Empty:
+				return false;
+			default:
+				assert(!"Not Found state. Critical Error.");
+				break;
+			}
+
+		} while (i != HashIndex);
+
+		return false;
+	}
+
+	Pair* Find(const Type1& _Key)
+	{
+		size_t HashIndex = Hash(_Key) % Capacity;
+		size_t i = HashIndex;
+
+		do
+		{
+			switch (States[i])
+			{
+			case State::Occupied:
+				if (Eq(_Key, Bucket[i].Key))
+				{
+					return Bucket + i;
+				}
+				[[fallthrough]];
+			case State::Deleted:
+				(++i) % Capacity;
+				continue;
+			case State::Empty:
+				return nullptr;
+			default:
+				assert(!"Not Found state. Critical Error.");
+				break;
+			}
+
+		} while (i != HashIndex);
+
+		return nullptr;
 	}
 
 private:
 	void ReHash()
 	{
-
+		ReAllocate(Capacity);
 	}
 
 public:
@@ -177,5 +254,17 @@ public:
 	{
 		return LoadFactor * Capacity < Size;
 	}
+	bool SetLoadFactor(float _NewLoadFactor)
+	{
+		if (_NewLoadFactor < 0.5f || _NewLoadFactor > 1.0f)
+			return false;
 
+		LoadFactor = _NewLoadFactor;
+		return true;
+	}
+	float GetLoadFactor() const noexcept
+	{
+		return LoadFactor;
+	}
+	
 };
