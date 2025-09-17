@@ -51,7 +51,16 @@ int main()
 
 	unordered_map<int, float> m;
 
-	m.
+
+	for (size_t i = 0; i < 1000; ++i)
+	{
+		m.Insert(unordered_map<int, float>::Pair(i, i + 0.141592f));
+	}
+	
+	auto a = m.Find(34);
+	auto b = m.Erase(2);
+	auto c = m.Contains(2);
+	auto d = m.Find(2);
 
 	// m.find(0);
 
