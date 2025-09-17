@@ -130,6 +130,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="DFS.h" />
     <ClInclude Include="priority_queue.h" />
     <ClInclude Include="list.h" />
     <ClInclude Include="map.h" />
@@ -142,6 +143,7 @@
     <ClInclude Include="vector.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DFS.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

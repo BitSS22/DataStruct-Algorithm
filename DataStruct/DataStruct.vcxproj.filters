@@ -29,9 +29,15 @@
     <ClInclude Include="unordered_map.h">
       <Filter>DataStruct</Filter>
     </ClInclude>
+    <ClInclude Include="DFS.h">
+      <Filter>Algorithm\Graph</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="DFS.cpp">
+      <Filter>Algorithm\Graph</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="DataStruct">
@@ -48,6 +54,9 @@
     </Filter>
     <Filter Include="Algorithm\Utility">
       <UniqueIdentifier>{1c52cf54-28b5-4c28-b2c0-e03297ad0eec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Algorithm\Graph">
+      <UniqueIdentifier>{03ecda9f-b741-40b7-8781-919bd71e2d3d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
