@@ -16,7 +16,7 @@ using HashFunc = std::hash<Type1>;
 using Equal = std::equal_to<void>;
 
 // 해쉬의 개념을 구현하기 위한 unordered_set.
-//template <typename Type1, typename Type2, typename HashFunc = std::hash<Key>, typename Equal = std::equal_to<void>>
+template <typename Type1, typename Type2, typename HashFunc = std::hash<Type1>, typename Equal = std::equal_to<void>>
 class unordered_map
 {
 public:
@@ -34,7 +34,7 @@ public:
 		Pair& operator= (Pair&& _Other) = default;
 
 		template <typename U1, typename U2>
-			requires std::constructible_from<Type1, U1&&>&& std::constructible_from<Type1, U2&&>
+			requires std::constructible_from<Type1, U1&&>&& std::constructible_from<Type2, U2&&>
 		explicit(!std::convertible_to<U1&&, Type1> || !std::convertible_to<U2&&, Type2>)
 			Pair(U1&& _Key, U2&& _Value)
 			noexcept(noexcept(Type1(Utility::Forward<U1>(_Key))) && noexcept(Type2(Utility::Forward<U2>(_Value))))
@@ -49,11 +49,14 @@ public:
 
 	enum class State : __int8
 	{
-		Empty, Occupied, Deleted
+		Empty = 0, Occupied, Deleted
 	};
 
 public:
-	unordered_map() = default;
+	unordered_map(size_t _Capacity = 16)
+	{
+		ReAllocate(_Capacity);
+	}
 	~unordered_map()
 	{
 		for (size_t i = 0; i < Capacity; ++i)
@@ -104,6 +107,8 @@ private:
 public:
 	void ReAllocate(size_t _NewCapacity)
 	{
+		assert(_NewCapacity);
+
 		if (_NewCapacity < Capacity)
 			return;
 
@@ -119,14 +124,15 @@ public:
 			Bucket = static_cast<Pair*>(::operator new(sizeof(Pair) * _NewCapacity));
 		}
 
-		States = new State[_NewCapacity](State::Empty);
+		States = new State[_NewCapacity]{};
 		Size = 0;
+		size_t OldCapacity = Capacity;
 		Capacity = _NewCapacity;
 		
 		if (!OldBucket || !OldStates)
 			return;
 
-		for (size_t i = 0; i < Capacity; ++i)
+		for (size_t i = 0; i < OldCapacity; ++i)
 		{
 			if (OldStates[i] == State::Occupied)
 			{
@@ -136,7 +142,7 @@ public:
 			}
 		}
 
-		if constexpr (alignof(Pair) < alignof(std::max_align_t))
+		if constexpr (alignof(Pair) > alignof(std::max_align_t))
 		{
 			::operator delete(OldBucket, std::align_val_t(alignof(Pair)));
 		}
@@ -145,7 +151,7 @@ public:
 			::operator delete(OldBucket);
 		}
 
-		::operator delete(OldStates);
+		delete[] OldStates;
 	}
 
 	void Insert(const Pair& _Item)
@@ -164,9 +170,15 @@ public:
 
 		do
 		{
-			if (States[HashIndex] == State::Occupied)
+			if (States[i] == State::Occupied)
 			{
-				(++i) % Capacity;
+				if (Eq(Bucket[i].Key, _Item.Key))
+				{
+					Bucket[i].Value = _Item.Value;
+					return;
+				}
+
+				i = (i + 1) % Capacity;
 				continue;
 			}
 
@@ -180,11 +192,45 @@ public:
 
 	void Insert(Pair&& _Item)
 	{
+		assert(Capacity);
+		assert(Bucket);
+		assert(States);
 
+		if (IsThreshold())
+		{
+			ReAllocate(Capacity * 2);
+		}
+
+		size_t HashIndex = Hash(_Item.Key) % Capacity;
+		size_t i = HashIndex;
+
+		do
+		{
+			if (States[i] == State::Occupied)
+			{
+				if (Eq(Bucket[i].Key, _Item.Key))
+				{
+					Bucket[i].Value = Utility::Move(_Item.Value);
+					return;
+				}
+
+				i = (i + 1) % Capacity;
+				continue;
+			}
+
+			new(Bucket + i) Pair(Utility::Move(_Item));
+			States[i] = State::Occupied;
+			++Size;
+			return;
+		} while (i != HashIndex);
 	}
 
 	bool Contains(const Type1& _Key) const
 	{
+		assert(Capacity);
+		assert(Bucket);
+		assert(States);
+
 		size_t HashIndex = Hash(_Key) % Capacity;
 		size_t i = HashIndex;
 
@@ -199,7 +245,7 @@ public:
 				}
 				[[fallthrough]];
 			case State::Deleted:
-				(++i) % Capacity;
+				i = (i + 1) % Capacity;
 				continue;
 			case State::Empty:
 				return false;
@@ -215,6 +261,10 @@ public:
 
 	Pair* Find(const Type1& _Key)
 	{
+		assert(Capacity);
+		assert(Bucket);
+		assert(States);
+
 		size_t HashIndex = Hash(_Key) % Capacity;
 		size_t i = HashIndex;
 
@@ -229,7 +279,7 @@ public:
 				}
 				[[fallthrough]];
 			case State::Deleted:
-				(++i) % Capacity;
+				i = (i + 1) % Capacity;
 				continue;
 			case State::Empty:
 				return nullptr;
@@ -252,11 +302,12 @@ private:
 public:
 	bool IsThreshold() const noexcept
 	{
-		return LoadFactor * Capacity < Size;
+		return LoadFactor * static_cast<float>(Capacity) <= static_cast<float>(Size);
 	}
+	// Min : 0.3f, Max : 0.99f
 	bool SetLoadFactor(float _NewLoadFactor)
 	{
-		if (_NewLoadFactor < 0.5f || _NewLoadFactor > 1.0f)
+		if (_NewLoadFactor < 0.3f || _NewLoadFactor > 0.99f)
 			return false;
 
 		LoadFactor = _NewLoadFactor;
