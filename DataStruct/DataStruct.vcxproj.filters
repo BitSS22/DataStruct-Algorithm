@@ -29,14 +29,20 @@
     <ClInclude Include="unordered_map.h">
       <Filter>DataStruct</Filter>
     </ClInclude>
-    <ClInclude Include="DFS.h">
+    <ClInclude Include="Graph.h">
       <Filter>Algorithm\Graph</Filter>
+    </ClInclude>
+    <ClInclude Include="DFS.h">
+      <Filter>Algorithm\Graph\GraphAlgorithm</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="DFS.cpp">
+    <ClCompile Include="Graph.cpp">
       <Filter>Algorithm\Graph</Filter>
+    </ClCompile>
+    <ClCompile Include="DFS.cpp">
+      <Filter>Algorithm\Graph\GraphAlgorithm</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -57,6 +63,9 @@
     </Filter>
     <Filter Include="Algorithm\Graph">
       <UniqueIdentifier>{03ecda9f-b741-40b7-8781-919bd71e2d3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Algorithm\Graph\GraphAlgorithm">
+      <UniqueIdentifier>{8e8645dd-c1af-4f56-bf97-9f0b44e3e3c6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
