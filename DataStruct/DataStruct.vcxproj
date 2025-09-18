@@ -130,6 +130,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AdjacencyList.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="DFS.h" />
     <ClInclude Include="Graph.h" />
     <ClInclude Include="priority_queue.h" />
@@ -144,6 +148,10 @@
     <ClInclude Include="vector.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AdjacencyList.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="DFS.cpp" />
     <ClCompile Include="Graph.cpp" />
     <ClCompile Include="main.cpp" />

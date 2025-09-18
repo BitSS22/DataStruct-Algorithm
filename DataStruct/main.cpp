@@ -121,8 +121,8 @@ void SortTest()
 		//Sort::MergeSort(Arr, ARRSIZE);
 		//Sort::ShellSort(Arr, ARRSIZE);
 		//Sort::HeapSort(Arr, ARRSIZE);
-		//Sort::QuickSort(Arr, ARRSIZE);
-		Sort::RadixSort(Arr, ARRSIZE, static_cast<int>(ARRSIZE));
+		Sort::QuickSort(Arr, ARRSIZE);
+		//Sort::RadixSort(Arr, ARRSIZE, static_cast<int>(ARRSIZE));
 		//Sort::ShellSort(Arr, ARRSIZE, [](const int& _Left, const int& _Right) noexcept -> bool { return _Left > _Right; });
 
 		// Time End

@@ -35,6 +35,9 @@
     <ClInclude Include="DFS.h">
       <Filter>Algorithm\Graph\GraphAlgorithm</Filter>
     </ClInclude>
+    <ClInclude Include="AdjacencyList.h">
+      <Filter>Algorithm\Graph</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -43,6 +46,9 @@
     </ClCompile>
     <ClCompile Include="DFS.cpp">
       <Filter>Algorithm\Graph\GraphAlgorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="AdjacencyList.cpp">
+      <Filter>Algorithm\Graph</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
