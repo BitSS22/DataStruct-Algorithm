@@ -15,13 +15,30 @@ public:
 	template <typename CallBack>
 	void ForEachNeighbor(NodeID _Node, CallBack&& _CallBack) const noexcept
 	{
-		// code..
+		Grid2D Index = ConvertGrid2D(_Node);
+		Grid2D Dir[4] = { {1,0}, {-1,0}, {0,1}, {0,-1} };
+
+		for (size_t i = 0; i < 4; ++i)
+		{
+			Grid2D Finder = Index + Dir[i];
+			if (InBound(Finder))
+			{
+				const Tile& TileRef = GetTile(Finder);
+
+				if (TileRef.Movable)
+				{
+					const Cost Weight = static_cast<Cost>(BaseCost * TileRef.CostMul);
+					_CallBack(ConvertNodeID(Finder), Weight);
+				}
+			}
+		}
+
+		// Todo.. Diagonal Code
 	}
 	size_t GetNodeCount() const noexcept
 	{
 		return static_cast<size_t>(Size.x * Size.y);
 	}
-
 	bool IsValid(NodeID _Node) const noexcept
 	{
 		return static_cast<size_t>(_Node) < GetNodeCount();
@@ -31,7 +48,7 @@ public:
 	struct Tile
 	{
 	public:
-		bool Passable;
+		bool Movable;
 		Cost CostMul;
 	};
 
@@ -40,6 +57,12 @@ public:
 	public:
 		unsigned int x;
 		unsigned int y;
+
+	public:
+		Grid2D operator+(Grid2D _Other) const noexcept
+		{
+			return Grid2D { x + _Other.x, y + _Other.y };
+		}
 	};
 
 public:

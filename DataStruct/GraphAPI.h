@@ -33,14 +33,14 @@ concept GraphAPI = requires(const Type & _Type, typename Type::NodeID _ID)
 	typename Type::Cost;
 
 	// 아래 세 동작이 가능해야 함.
-	{ _Type.NodeCount() } -> std::convertible_to<size_t>;
+	{ _Type.GetNodeCount() } -> std::convertible_to<size_t>;
 	{ _Type.IsValid(_ID) } -> std::same_as<bool>;
 	_Type.ForEachNeighbor(_ID, NeighborProbe<Type>{});
 };
 
 // 휴리스틱 기본 함수.
 template <typename Type>
-constexpr inline typename Type::Cost DefaultZeroHeuristic(const Type&, typename Type::NodeID, typename Type::NodeID) noexcept
+constexpr inline typename Type::Cost ZeroHeuristic(const Type&, typename Type::NodeID, typename Type::NodeID) noexcept
 {
 	return static_cast<typename Type::Cost>(0);
 }

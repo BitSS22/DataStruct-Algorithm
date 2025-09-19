@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <cassert>
+#include <type_traits>
 
 #include "GraphAPI.h"
 
@@ -17,7 +18,7 @@ public:
 	{
 		const std::vector<Edge>& Bucket = List[static_cast<size_t>(_Node)];
 
-		for (size_t i = 0; i < List.size(); ++i)
+		for (size_t i = 0; i < Bucket.size(); ++i)
 		{
 			_CallBack(Bucket[i].Dest, Bucket[i].Weight);
 		}
@@ -52,11 +53,11 @@ public:
 	{
 		assert(IsValid(_Start) && IsValid(_End));
 
-		List[static_cast<size_t>(_Start)].push_back(Edge(_End, _Weight));
+		List[static_cast<size_t>(_Start)].push_back(Edge{ _Start, _Weight });
 
-		if constexpr (std::is_same_v < DirectionTag, UnDirected)
+		if constexpr (std::is_same_v<DirectionTag, UnDirected>)
 		{
-			List[static_cast<size_t>(_End)].push_back(Edge(_Start, _Weight));
+			List[static_cast<size_t>(_End)].push_back(Edge{ _Start, _Weight });
 		}
 	}
 

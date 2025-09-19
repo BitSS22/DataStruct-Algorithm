@@ -2,6 +2,7 @@
 #include <limits>
 #include <cassert>
 #include <vector>
+#include <type_traits>
 
 #include "GraphAPI.h"
 
@@ -16,8 +17,6 @@ public:
 	template <typename CallBack>
 	void ForEachNeighbor(NodeID _Node, CallBack&& _CallBack) const noexcept
 	{
-		const std::vector<Edge>& Bucket = List[static_cast<size_t>(_Node)];
-
 		for (size_t i = 0; i < NodeCount; ++i)
 		{
 			const Cost Weight = Matrix[Idx(_Node, static_cast<NodeID>(i))];
@@ -54,7 +53,7 @@ public:
 
 		Matrix[Idx(_Start, _End)] = _Weight;
 
-		if constexpr (std::is_same_v<DirectionTag, Directed>)
+		if constexpr (std::is_same_v<DirectionTag, UnDirected>)
 		{
 			Matrix[Idx(_End, _Start)] = _Weight;
 		}
@@ -69,7 +68,7 @@ private:
 public:
 	Cost GetCost(NodeID _Start, NodeID _End) const noexcept
 	{
-		return Matrix[Ind(_Start, _End)];
+		return Matrix[Idx(_Start, _End)];
 	}
 
 };
