@@ -29,25 +29,37 @@
     <ClInclude Include="unordered_map.h">
       <Filter>DataStruct</Filter>
     </ClInclude>
-    <ClInclude Include="Graph.h">
-      <Filter>Algorithm\Graph</Filter>
-    </ClInclude>
     <ClInclude Include="DFS.h">
       <Filter>Algorithm\Graph\GraphAlgorithm</Filter>
     </ClInclude>
-    <ClInclude Include="AdjacencyList.h">
+    <ClInclude Include="AdjacencyListGraph.h">
+      <Filter>Algorithm\Graph</Filter>
+    </ClInclude>
+    <ClInclude Include="MatrixGraph.h">
+      <Filter>Algorithm\Graph</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphAPI.h">
+      <Filter>Algorithm\Graph\API</Filter>
+    </ClInclude>
+    <ClInclude Include="TileMapGraph.h">
       <Filter>Algorithm\Graph</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Graph.cpp">
-      <Filter>Algorithm\Graph</Filter>
-    </ClCompile>
     <ClCompile Include="DFS.cpp">
       <Filter>Algorithm\Graph\GraphAlgorithm</Filter>
     </ClCompile>
-    <ClCompile Include="AdjacencyList.cpp">
+    <ClCompile Include="AdjacencyListGraph.cpp">
+      <Filter>Algorithm\Graph</Filter>
+    </ClCompile>
+    <ClCompile Include="MatrixGraph.cpp">
+      <Filter>Algorithm\Graph</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphAPI.cpp">
+      <Filter>Algorithm\Graph\API</Filter>
+    </ClCompile>
+    <ClCompile Include="TileMapGraph.cpp">
       <Filter>Algorithm\Graph</Filter>
     </ClCompile>
   </ItemGroup>
@@ -72,6 +84,9 @@
     </Filter>
     <Filter Include="Algorithm\Graph\GraphAlgorithm">
       <UniqueIdentifier>{8e8645dd-c1af-4f56-bf97-9f0b44e3e3c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Algorithm\Graph\API">
+      <UniqueIdentifier>{fb70f33f-3e80-42d5-827b-1efa4a094973}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

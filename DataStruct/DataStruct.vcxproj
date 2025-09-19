@@ -130,12 +130,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="AdjacencyList.h">
+    <ClInclude Include="AdjacencyListGraph.h">
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="MatrixGraph.h" />
     <ClInclude Include="DFS.h" />
-    <ClInclude Include="Graph.h" />
+    <ClInclude Include="GraphAPI.h" />
     <ClInclude Include="priority_queue.h" />
     <ClInclude Include="list.h" />
     <ClInclude Include="map.h" />
@@ -143,20 +144,21 @@
     <ClInclude Include="queue.h" />
     <ClInclude Include="Shuffle.h" />
     <ClInclude Include="Sort.h" />
+    <ClInclude Include="TileMapGraph.h" />
     <ClInclude Include="unordered_map.h" />
     <ClInclude Include="Utility.h" />
     <ClInclude Include="vector.h" />
-    <ClInclude Include="VertexData.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AdjacencyList.cpp">
+    <ClCompile Include="AdjacencyListGraph.cpp">
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="MatrixGraph.cpp" />
     <ClCompile Include="DFS.cpp" />
-    <ClCompile Include="Graph.cpp" />
+    <ClCompile Include="GraphAPI.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="VertexData.cpp" />
+    <ClCompile Include="TileMapGraph.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
