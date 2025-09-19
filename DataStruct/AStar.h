@@ -1,6 +1,7 @@
 #pragma once
 #include "GraphAPI.h"
 
-namespace DFS
+namespace AStar
 {
+
 }

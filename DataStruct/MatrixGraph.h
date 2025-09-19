@@ -71,5 +71,10 @@ public:
 		return Matrix[Idx(_Start, _End)];
 	}
 
+	constexpr Cost Heuristic(NodeID, NodeID) const noexcept
+	{
+		return static_cast<Cost>(0);
+	}
+
 };
 

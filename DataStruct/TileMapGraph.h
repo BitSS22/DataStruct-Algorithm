@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <cassert>
+#include <cmath>
 
 #include "GraphAPI.h"
 
@@ -16,14 +17,11 @@ public:
 	void ForEachNeighbor(NodeID _Node, CallBack&& _CallBack) const noexcept
 	{
 		Grid2D Index = ConvertGrid2D(_Node);
-		int DirY[4] = { 1, -1, 0, 0 };
-		int DirX[4] = { 0, 0, 1, -1 };
+		static constexpr Grid2D Dir[4] = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} };
 
 		for (size_t i = 0; i < 4; ++i)
 		{
-			Index.x += DirX[i];
-			Index.y += DirY[i];
-			Grid2D Finder = Index;
+			Grid2D Finder = Index + Dir[i];
 
 			if (InBound(Finder))
 			{
@@ -37,7 +35,26 @@ public:
 			}
 		}
 
-		// Todo.. Diagonal Code
+		if constexpr (Diagonal)
+		{
+			static constexpr Grid2D DDir[4] = { {1, 1}, {-1, -1}, {-1, 1}, {1, -1} };
+
+			for (size_t i = 0; i < 4; ++i)
+			{
+				Grid2D Finder = Index + DDir[i];
+
+				if (InBound(Finder))
+				{
+					const Tile& TileRef = GetTile(Finder);
+
+					if (TileRef.Movable)
+					{
+						const Cost Weight = static_cast<Cost>(BaseCost * TileRef.CostMul * static_cast<Cost>(std::sqrt(2.0)));
+						_CallBack(ConvertNodeID(Finder), Weight);
+					}
+				}
+			}
+		}
 	}
 	size_t GetNodeCount() const noexcept
 	{
@@ -59,21 +76,29 @@ public:
 	struct Grid2D
 	{
 	public:
-		unsigned int x;
-		unsigned int y;
+		int x;
+		int y;
 
 	public:
-		Grid2D operator+(Grid2D _Other) const noexcept
+		Grid2D operator+ (Grid2D _Other) const noexcept
 		{
-			return Grid2D { x + _Other.x, y + _Other.y };
+			return Grid2D{ x + _Other.x, y + _Other.y };
 		}
+		Grid2D operator- (Grid2D _Other) const noexcept
+		{
+			return Grid2D{ x - _Other.x, y - _Other.y };
+		}
+
 	};
 
 public:
 	TileMapGraph(Grid2D _Size, Cost _BaseCost)
 		: Size(_Size)
 		, Grid(_Size.x * _Size.y, Tile { true, static_cast<Cost>(1) })
-		, BaseCost(_BaseCost) {}
+		, BaseCost(_BaseCost)
+	{
+		assert(_Size.x > 0 && _Size.y > 0);
+	}
 
 private:
 	Grid2D Size;
@@ -90,7 +115,7 @@ public:
 public:
 	bool InBound(Grid2D _Index) const noexcept
 	{
-		return _Index.x < Size.x && _Index.y < Size.y;
+		return _Index.x >= 0 && _Index.y >= 0 && _Index.x < Size.x && _Index.y < Size.y;
 	}
 	const Tile& GetTile(Grid2D _Index) const noexcept
 	{
@@ -103,9 +128,31 @@ public:
 	Grid2D ConvertGrid2D(NodeID _Node) const noexcept
 	{
 		Grid2D Result;
-		Result.x = _Node % Size.x;
-		Result.y = _Node / Size.x;
+		Result.x = static_cast<int>(_Node) % Size.x;
+		Result.y = static_cast<int>(_Node) / Size.x;
 		return Result;
+	}
+
+	Cost Heuristic(NodeID _Start, NodeID _End) const noexcept
+	{
+		Grid2D StartNode = ConvertGrid2D(_Start);
+		Grid2D EndNode = ConvertGrid2D(_End);
+
+		Grid2D Dist = StartNode - EndNode;
+		Dist.x = Dist.x < 0 ? -Dist.x : Dist.x;
+		Dist.y = Dist.y < 0 ? -Dist.y : Dist.y;
+
+		if constexpr (!Diagonal)
+		{
+			return static_cast<Cost>(Dist.x + Dist.y) * static_cast<Cost>(BaseCost);
+		}
+		else
+		{
+			Cost Max = Dist.x < Dist.y ? Dist.y : Dist.x;
+			Cost Min = Dist.y < Dist.x ? Dist.y : Dist.x;
+
+			return static_cast<Cost>(Min * BaseCost * static_cast<Cost>(std::sqrt(2.0)) + (Max - Min) * BaseCost);
+		}
 	}
 
 };

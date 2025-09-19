@@ -37,10 +37,3 @@ concept GraphAPI = requires(const Type & _Type, typename Type::NodeID _ID)
 	{ _Type.IsValid(_ID) } -> std::same_as<bool>;
 	_Type.ForEachNeighbor(_ID, NeighborProbe<Type>{});
 };
-
-// ÈÞ¸®½ºÆ½ ±âº» ÇÔ¼ö.
-template <typename Type>
-constexpr inline typename Type::Cost ZeroHeuristic(const Type&, typename Type::NodeID, typename Type::NodeID) noexcept
-{
-	return static_cast<typename Type::Cost>(0);
-}

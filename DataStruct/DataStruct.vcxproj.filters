@@ -44,12 +44,18 @@
     <ClInclude Include="TileMapGraph.h">
       <Filter>Algorithm\Graph</Filter>
     </ClInclude>
+    <ClInclude Include="BFS.h">
+      <Filter>Algorithm\Graph\GraphAlgorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="Dijkstra.h">
+      <Filter>Algorithm\Graph\GraphAlgorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="AStar.h">
+      <Filter>Algorithm\Graph\GraphAlgorithm</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="DFS.cpp">
-      <Filter>Algorithm\Graph\GraphAlgorithm</Filter>
-    </ClCompile>
     <ClCompile Include="AdjacencyListGraph.cpp">
       <Filter>Algorithm\Graph</Filter>
     </ClCompile>

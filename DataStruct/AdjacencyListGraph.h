@@ -53,12 +53,17 @@ public:
 	{
 		assert(IsValid(_Start) && IsValid(_End));
 
-		List[static_cast<size_t>(_Start)].push_back(Edge{ _Start, _Weight });
+		List[static_cast<size_t>(_Start)].push_back(Edge{ _End, _Weight });
 
 		if constexpr (std::is_same_v<DirectionTag, UnDirected>)
 		{
 			List[static_cast<size_t>(_End)].push_back(Edge{ _Start, _Weight });
 		}
+	}
+
+	constexpr Cost Heuristic(NodeID, NodeID) const noexcept
+	{
+		return static_cast<Cost>(0);
 	}
 
 };
