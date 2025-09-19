@@ -21,6 +21,10 @@
 #include "priority_queue.h"
 #include "unordered_map.h"
 
+#include "AdjacencyListGraph.h"
+#include "MatrixGraph.h"
+#include "TileMapGraph.h"
+
 // Make Algorithm
 #include "Utility.h"
 #include "Shuffle.h"
@@ -49,9 +53,26 @@ int main()
 	std::cin.tie(0);
 	std::cout.tie(0);
 
+	//AdjacencyListGraph<size_t, float, Directed> G(5);
+	MatrixGraph<size_t, float, Directed> G(5);
 
+	for (size_t i = 0; i < 5; ++i)
+	{
+		for (size_t j = 0; j < 5; ++j)
+		{
+			if (i != j)
+				G.SetCost(i, j, i * j);
+		}
+	}
 
-
+	for (size_t i = 0; i < 5; ++i)
+	{
+		G.ForeachNeighbor(i, [&i](size_t _Dest, float _Weight)
+			{
+				std::cout << i << " -> " << _Dest << " : W=" << _Weight << std::endl;
+			}
+		);
+	}
 
 	SortTest();
 }

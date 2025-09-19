@@ -14,7 +14,7 @@ public:
 	using Cost = Cost_Type;
 
 	template <typename CallBack>
-	void ForEachNeighbor(NodeID _Node, CallBack&& _CallBack) const noexcept
+	void ForeachNeighbor(NodeID _Node, CallBack&& _CallBack) const noexcept
 	{
 		const std::vector<Edge>& Bucket = List[static_cast<size_t>(_Node)];
 
@@ -60,10 +60,10 @@ public:
 			List[static_cast<size_t>(_End)].push_back(Edge{ _Start, _Weight });
 		}
 	}
-
 	constexpr Cost Heuristic(NodeID, NodeID) const noexcept
 	{
 		return static_cast<Cost>(0);
 	}
+
 
 };

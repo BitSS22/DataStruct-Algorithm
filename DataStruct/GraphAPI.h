@@ -3,8 +3,6 @@
 #include <type_traits>
 #include <concepts>
 
-// GPT 도움 받아서 만든다.
-
 // 템플릿 기본 타입 정의
 using DefaultNodeID = unsigned int;
 using DefaultCost = float;
@@ -35,5 +33,5 @@ concept GraphAPI = requires(const Type & _Type, typename Type::NodeID _ID)
 	// 아래 세 동작이 가능해야 함.
 	{ _Type.GetNodeCount() } -> std::convertible_to<size_t>;
 	{ _Type.IsValid(_ID) } -> std::same_as<bool>;
-	_Type.ForEachNeighbor(_ID, NeighborProbe<Type>{});
+	_Type.ForeachNeighbor(_ID, NeighborProbe<Type>{});
 };

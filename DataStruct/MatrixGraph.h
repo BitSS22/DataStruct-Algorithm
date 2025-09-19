@@ -15,7 +15,7 @@ public:
 	using Cost = Cost_Type;
 
 	template <typename CallBack>
-	void ForEachNeighbor(NodeID _Node, CallBack&& _CallBack) const noexcept
+	void ForeachNeighbor(NodeID _Node, CallBack&& _CallBack) const noexcept
 	{
 		for (size_t i = 0; i < NodeCount; ++i)
 		{
@@ -58,6 +58,10 @@ public:
 			Matrix[Idx(_End, _Start)] = _Weight;
 		}
 	}
+	constexpr Cost Heuristic(NodeID, NodeID) const noexcept
+	{
+		return static_cast<Cost>(0);
+	}
 
 private:
 	size_t Idx(NodeID _y, NodeID _x) const noexcept
@@ -70,10 +74,9 @@ public:
 	{
 		return Matrix[Idx(_Start, _End)];
 	}
-
-	constexpr Cost Heuristic(NodeID, NodeID) const noexcept
+	Cost GetInf() const noexcept
 	{
-		return static_cast<Cost>(0);
+		return Inf;
 	}
 
 };

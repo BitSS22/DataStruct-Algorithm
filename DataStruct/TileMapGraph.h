@@ -14,7 +14,7 @@ public:
 	using Cost = Cost_Type;
 
 	template <typename CallBack>
-	void ForEachNeighbor(NodeID _Node, CallBack&& _CallBack) const noexcept
+	void ForeachNeighbor(NodeID _Node, CallBack&& _CallBack) const noexcept
 	{
 		Grid2D Index = ConvertGrid2D(_Node);
 		static constexpr Grid2D Dir[4] = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} };
@@ -38,6 +38,7 @@ public:
 		if constexpr (Diagonal)
 		{
 			static constexpr Grid2D DDir[4] = { {1, 1}, {-1, -1}, {-1, 1}, {1, -1} };
+			static constexpr Cost DiaMul = static_cast<Cost>(std::sqrt(2.0));
 
 			for (size_t i = 0; i < 4; ++i)
 			{
@@ -49,7 +50,7 @@ public:
 
 					if (TileRef.Movable)
 					{
-						const Cost Weight = static_cast<Cost>(BaseCost * TileRef.CostMul * static_cast<Cost>(std::sqrt(2.0)));
+						const Cost Weight = static_cast<Cost>(BaseCost * TileRef.CostMul * DiaMul);
 						_CallBack(ConvertNodeID(Finder), Weight);
 					}
 				}
@@ -80,11 +81,11 @@ public:
 		int y;
 
 	public:
-		Grid2D operator+ (Grid2D _Other) const noexcept
+		constexpr Grid2D operator+ (Grid2D _Other) const noexcept
 		{
 			return Grid2D{ x + _Other.x, y + _Other.y };
 		}
-		Grid2D operator- (Grid2D _Other) const noexcept
+		constexpr Grid2D operator- (Grid2D _Other) const noexcept
 		{
 			return Grid2D{ x - _Other.x, y - _Other.y };
 		}
@@ -111,28 +112,6 @@ public:
 		assert(InBound(_Index));
 		Grid[static_cast<size_t>(_Index.y * Size.x + _Index.x)] = Tile { _Passable, _CostMul };
 	}
-
-public:
-	bool InBound(Grid2D _Index) const noexcept
-	{
-		return _Index.x >= 0 && _Index.y >= 0 && _Index.x < Size.x && _Index.y < Size.y;
-	}
-	const Tile& GetTile(Grid2D _Index) const noexcept
-	{
-		return Grid[static_cast<size_t>(_Index.y * Size.x + _Index.x)];
-	}
-	NodeID ConvertNodeID(Grid2D _Index) const noexcept
-	{
-		return static_cast<NodeID>(_Index.y * Size.x + _Index.x);
-	}
-	Grid2D ConvertGrid2D(NodeID _Node) const noexcept
-	{
-		Grid2D Result;
-		Result.x = static_cast<int>(_Node) % Size.x;
-		Result.y = static_cast<int>(_Node) / Size.x;
-		return Result;
-	}
-
 	Cost Heuristic(NodeID _Start, NodeID _End) const noexcept
 	{
 		Grid2D StartNode = ConvertGrid2D(_Start);
@@ -155,4 +134,28 @@ public:
 		}
 	}
 
+public:
+	bool InBound(Grid2D _Index) const noexcept
+	{
+		return _Index.x >= 0 && _Index.y >= 0 && _Index.x < Size.x && _Index.y < Size.y;
+	}
+	const Tile& GetTile(Grid2D _Index) const noexcept
+	{
+		return Grid[static_cast<size_t>(_Index.y * Size.x + _Index.x)];
+	}
+	NodeID ConvertNodeID(Grid2D _Index) const noexcept
+	{
+		return static_cast<NodeID>(_Index.y * Size.x + _Index.x);
+	}
+	Grid2D ConvertGrid2D(NodeID _Node) const noexcept
+	{
+		Grid2D Result;
+		Result.x = static_cast<int>(_Node) % Size.x;
+		Result.y = static_cast<int>(_Node) / Size.x;
+		return Result;
+	}
+	Cost GetBaseCost() const noexcept
+	{
+		return BaseCost;
+	}
 };
