@@ -16,11 +16,15 @@ public:
 	void ForEachNeighbor(NodeID _Node, CallBack&& _CallBack) const noexcept
 	{
 		Grid2D Index = ConvertGrid2D(_Node);
-		Grid2D Dir[4] = { {1,0}, {-1,0}, {0,1}, {0,-1} };
+		int DirY[4] = { 1, -1, 0, 0 };
+		int DirX[4] = { 0, 0, 1, -1 };
 
 		for (size_t i = 0; i < 4; ++i)
 		{
-			Grid2D Finder = Index + Dir[i];
+			Index.x += DirX[i];
+			Index.y += DirY[i];
+			Grid2D Finder = Index;
+
 			if (InBound(Finder))
 			{
 				const Tile& TileRef = GetTile(Finder);
