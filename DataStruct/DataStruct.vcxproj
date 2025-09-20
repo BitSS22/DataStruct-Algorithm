@@ -135,6 +135,7 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="BFS.h" />
+    <ClInclude Include="Dijkstra.h" />
     <ClInclude Include="MatrixGraph.h" />
     <ClInclude Include="DFS.h" />
     <ClInclude Include="GraphAPI.h" />
@@ -151,14 +152,8 @@
     <ClInclude Include="vector.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AdjacencyListGraph.cpp">
-      <SubType>
-      </SubType>
-    </ClCompile>
-    <ClCompile Include="MatrixGraph.cpp" />
     <ClCompile Include="GraphAPI.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="TileMapGraph.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

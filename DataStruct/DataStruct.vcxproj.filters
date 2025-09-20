@@ -47,20 +47,14 @@
     <ClInclude Include="BFS.h">
       <Filter>Algorithm\Graph\GraphAlgorithm</Filter>
     </ClInclude>
+    <ClInclude Include="Dijkstra.h">
+      <Filter>Algorithm\Graph\GraphAlgorithm</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="AdjacencyListGraph.cpp">
-      <Filter>Algorithm\Graph</Filter>
-    </ClCompile>
-    <ClCompile Include="MatrixGraph.cpp">
-      <Filter>Algorithm\Graph</Filter>
-    </ClCompile>
     <ClCompile Include="GraphAPI.cpp">
       <Filter>Algorithm\Graph\API</Filter>
-    </ClCompile>
-    <ClCompile Include="TileMapGraph.cpp">
-      <Filter>Algorithm\Graph</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
