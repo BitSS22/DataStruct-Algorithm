@@ -134,6 +134,7 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="AStar.h" />
     <ClInclude Include="BFS.h" />
     <ClInclude Include="Dijkstra.h" />
     <ClInclude Include="MatrixGraph.h" />

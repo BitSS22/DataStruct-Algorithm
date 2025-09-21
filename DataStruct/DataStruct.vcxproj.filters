@@ -50,6 +50,9 @@
     <ClInclude Include="Dijkstra.h">
       <Filter>Algorithm\Graph\GraphAlgorithm</Filter>
     </ClInclude>
+    <ClInclude Include="AStar.h">
+      <Filter>Algorithm\Graph\GraphAlgorithm</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
