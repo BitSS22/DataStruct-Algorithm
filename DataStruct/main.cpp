@@ -30,6 +30,10 @@
 #include "Shuffle.h"
 #include "Sort.h"
 
+#include "DFS.h"
+#include "BFS.h"
+#include "Dijkstra.h"
+
 // IO
 #include <iostream>
 #include <iomanip>
@@ -41,6 +45,7 @@
 // Timer
 #include <chrono>
 
+void GraphTest();
 void SortTest();
 
 int main()
@@ -53,28 +58,39 @@ int main()
 	std::cin.tie(0);
 	std::cout.tie(0);
 
-	//AdjacencyListGraph<size_t, float, Directed> G(5);
-	MatrixGraph<size_t, float, Directed> G(5);
+	// SortTest();
+	GraphTest();
+}
 
-	for (size_t i = 0; i < 5; ++i)
-	{
-		for (size_t j = 0; j < 5; ++j)
-		{
-			if (i != j)
-				G.SetCost(i, j, i * j);
-		}
-	}
-	
-	for (size_t i = 0; i < 5; ++i)
-	{
-		G.ForeachNeighbor(i, [&i](size_t _Dest, float _Weight)
-			{
-				std::cout << i << " -> " << _Dest << " : W=" << _Weight << std::endl;
-			}
-		);
-	}
+void GraphTest()
+{
+	AdjacencyListGraph<unsigned int, unsigned int, UnDirected> Graph(7);
 
-	SortTest();
+	Graph.AddEdge(1, 2, 7);
+	Graph.AddEdge(1, 3, 4);
+	Graph.AddEdge(1, 4, 9);
+
+	Graph.AddEdge(2, 5, 6);
+	Graph.AddEdge(2, 6, 3);
+
+	Graph.AddEdge(3, 4, 3);
+
+	Graph.AddEdge(4, 6, 2);
+
+	Graph.AddEdge(5, 6, 4);
+
+	const unsigned int StartIndex = 1;
+	std::vector<unsigned int> Result = Dijkstra(Graph, StartIndex);
+
+	for (size_t i = 0; i < Result.size(); ++i)
+	{
+		std::cout << StartIndex << " -> " << i << " : Cost == ";
+
+		if (Result[i] == std::numeric_limits<unsigned int>::max())
+			std::cout << "Not Found" << std::endl;
+		else
+			std::cout << Result[i] << std::endl;
+	}
 }
 
 void SortTest()
