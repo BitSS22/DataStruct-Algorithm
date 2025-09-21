@@ -64,7 +64,7 @@ int main()
 				G.SetCost(i, j, i * j);
 		}
 	}
-
+	
 	for (size_t i = 0; i < 5; ++i)
 	{
 		G.ForeachNeighbor(i, [&i](size_t _Dest, float _Weight)
