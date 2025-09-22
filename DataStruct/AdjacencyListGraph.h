@@ -60,10 +60,5 @@ public:
 			List[static_cast<size_t>(_End)].push_back(Edge{ _Start, _Weight });
 		}
 	}
-	constexpr Cost Heuristic(NodeID, NodeID) const noexcept
-	{
-		return static_cast<Cost>(0);
-	}
-
 
 };

@@ -196,3 +196,13 @@ void SortTest()
 	std::cout << "Total Case : " << Elapseds.size() << std::endl;
 	std::cout << "Average Elapsed : " << Average / static_cast<double>(Elapseds.size()) << " ms" << std::endl;
 }
+
+//        .==.        .==.          
+//       //`^\\      //^`\\         
+//      // ^ ^\(\__/)/^ ^^\\        
+//     //^ ^^ ^/6  6\ ^^ ^ \\       
+//    //^ ^^ ^/( .. )\^ ^ ^ \\      
+//   // ^^ ^/\| v""v |/\^ ^ ^\\     
+//  // ^^/\/ /  `~~`  \ \/\^ ^\\    
+//  -----------------------------
+//								Å©¾Æ¾Ó

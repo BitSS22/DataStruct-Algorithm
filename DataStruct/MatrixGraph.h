@@ -58,10 +58,6 @@ public:
 			Matrix[Idx(_End, _Start)] = _Weight;
 		}
 	}
-	constexpr Cost Heuristic(NodeID, NodeID) const noexcept
-	{
-		return static_cast<Cost>(0);
-	}
 
 private:
 	size_t Idx(NodeID _y, NodeID _x) const noexcept
