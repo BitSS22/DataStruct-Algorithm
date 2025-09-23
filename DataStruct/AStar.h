@@ -7,6 +7,9 @@
 #include <cassert>
 #include <utility>
 #include <functional>
+#include <type_traits>
+#include <concepts>
+#include <algorithm>
 
 #include "GraphAPI.h"
 
@@ -40,9 +43,9 @@ struct UseGraphHeuristic {};
 template <GraphAPI G>
 struct ZeroHeuristic
 {
-	static constexpr typename G::Cost operator()() const noexcept
+	static constexpr typename G::Cost operator()(const G&, typename G::NodeID, typename G::NodeID) const noexcept
 	{
-		return static_cast<G::Cost>(0);
+		return static_cast<typename G::Cost>(0);
 	}
 };
 
@@ -61,58 +64,129 @@ concept HeuristicAPI = (std::invocable<const H&, const G&, typename G::NodeID, t
 						&& std::convertible_to<std::invoke_result_t<const H&, typename G::NodeID, typename G::NodeID>, typename G::Cost>)
 					|| (std::same_as<std::remove_cvref_t<H>, UseGraphHeuristic> && GraphHasHeuristic<G>);
 
+// 휴리스틱 함수를 호출하는 공통된 진입점.
+struct HeuristicInvoke
+{
+	// UseGraphHeuristic이면 여기로 오겠지.
+	template <GraphAPI G>
+	static typename G::Cost Invoke(UseGraphHeuristic, const G& _Graph, typename G::NodeID _Start, typename G::NodeID _End)
+	{
+		return static_cast<typename G::Cost>(_Graph.Heuristic(_Start, _End));
+	}
+
+	// 그 외엔 이쪽으로 간다.
+	template <GraphAPI G, typename H>
+	requires HeuristicAPI<G, H>
+	static constexpr typename G::Cost Invoke(H _Heuristic, const G& _Graph, typename G::NodeID _Start, typename G::NodeID _End)
+	{
+		if constexpr (std::invocable<const H&, const G&, typename G::NodeID, typename G::NodeID)
+		{
+			return static_cast<typename G::Cost>(_Heuristic(_Graph, _Start, _End));
+		}
+		else
+		{
+			return static_cast<typename G::Cost>(_Heuristic(_Start, _End));
+		}
+	}
+};
+
 template <GraphAPI Graph, typename Heuristic = DefaultHeuristic<Graph>>
 requires HeuristicAPI<Graph, Heuristic>
-std::vector<typename Graph::Cost> AStar(const Graph& _Graph, typename Graph::NodeID _Start, typename Graph::NodeID _End, Heuristic&& _Heuristic = Heuristic{})
+std::vector<typename Graph::NodeID> AStar(const Graph& _Graph, typename Graph::NodeID _Start, typename Graph::NodeID _End, Heuristic&& _Heuristic = Heuristic{})
 {
 	// 다익스트라와 기본적인 매커니즘은 같다.
 	// 다만, Cost를 저장할때 휴리스틱 추정치를 사용한다.
 	// 만약 휴리스틱이 0이라면, 다익스트라 최단경로 알고리즘.
 	using NodeID = typename Graph::NodeID;
 	using Cost = typename Graph::Cost;
-	using Pair = std::pair<Cost, NodeID>;
+	using FNPair = std::pair<Cost, NodeID>;
 
 	assert(_Graph.IsValid(_Start) && _Graph.IsValid(_End));
 
-	// OpenNode와 CloseNode.
-	std::priority_queue<Pair, std::vector<Pair>, std::greater<Pair>> OpenNodes = {};
-	std::vector<NodeID> CloseNodes = {};
-	CloseNodes.reserve(_Graph.GetNodeCount());
-	
-	CloseNodes[static_cast<size_t>(_Start)] = static_cast<Cost>(0);
-	OpenNodes.emplace(static_cast<Cost>(0), _Start);
-
-	// 비지 않을 때 까지 반복.
-	while (!OpenNodes.empty())
+	if (_Start == _End)
 	{
-		// 가장 짧은거 하나 빼낸다.
-		Pair pair = OpenNodes.top();
-		Cost C = pair.first;
-		NodeID N = pair.second;
+		return {};
+	}
 
-		OpenNodes.pop();
+	const size_t NodeCount = _Graph.GetNodeCount();
+	constexpr Cost InfCost = std::numeric_limits<Cost>::max();
+	constexpr NodeID InvalidNode = std::numeric_limits<NodeID>::max();
 
-		// 같지 않음 == 최신 데이터가 아님. 넘긴다.
-		if (!(CloseNodes[static_cast<size_t>(N)] == C))
+	struct Data
+	{
+	public:
+		Cost F = InfCost;
+		Cost G = InfCost;
+		NodeID Parent = InvalidNode;
+		bool Close = false;
+	};
+
+	// 데이터를 갱신할 곳이 필요하다.
+	std::vector<Data> Datas(_Graph.GetNodeCount());
+
+	std::priority_queue<FNPair, std::vector<FNPair>, std::greater<FNPair>> Open = {};
+
+	Datas[static_cast<size_t>(_Start)].G = static_cast<Cost>(0);
+	Datas[static_cast<size_t>(_Start)].F = HeuristicInvoke::Invoke(_Heuristic, _Graph, _Start, _End);
+	Open.emplace(Datas[static_cast<size_t>(_Start)].F, _Start);
+
+	while (!Open.empty())
+	{
+		FNPair Pair = Open.top();
+		Open.pop();
+		NodeID CurNode = Pair.second;
+
+		// 이미 닫힌 노드.
+		if (Datas[static_cast<size_t>(CurNode)].Close)
+		{
 			continue;
+		}
 
-		// Node와 인접한 이웃을 전부 도는 API 함수.
-		_Graph.ForeachNeighbor(N, [&CloseNodes, &OpenNodes, C](NodeID _ID, Cost _Cost)
+		Datas[static_cast<size_t>(CurNode)].Close = true;
+
+		// 도착!
+		if (CurNode == _End)
+		{
+			break;
+		}
+
+		_Graph.ForeachNeighbor(CurNode, [CurNode, &Datas, &Open, &_Graph, &_Heuristic, _End](NodeID _ID, Cost _Cost)
 			{
-				// 음수 가중치는 허용하지 않음.
-				assert(static_cast<Cost>(0) <= _Cost);
+				// 이미 닫힌 노드.
+				if (Datas[static_cast<size_t>(_ID)].Close)
+					return;
 
-				Cost NewDist = C + _Cost;
-				// 기존의 경로보다 값이 작다면.
-				if (NewDist < CloseNodes[static_cast<size_t>(_ID)])
+				Cost CurG = Datas[static_cast<size_t>(CurNode)].G + _Cost;
+
+				// 올 때 든 비용이 기존에 기록된 비용보다 적을때.
+				if (CurG < Datas[static_cast<size_t>(_ID)].G)
 				{
-					// Cost를 갱신하고, 방문시킬 NodeQ에 집어 넣는다.
-					CloseNodes[static_cast<size_t>(_ID)] = NewDist;
-					OpenNodes.emplace(NewDist, _ID);
+					// Data의 값을 갱신해 준다.
+					Datas[static_cast<size_t>(_ID)].G = CurG;
+					Datas[static_cast<size_t>(_ID)].F = CurG + HeuristicInvoke::Invoke(_Heuristic, _Graph, _ID, _End);
+					Datas[static_cast<size_t>(_ID)].Parent = CurNode;
+					// 그리고 Open에 집어넣는다.
+					Open.emplace(Datas[static_cast<size_t>(_ID)].F, _ID);
 				}
 			});
 	}
 
-	// 모든 노드로 가는 비용을 담은 vector
-	return CloseNodes;
+	// 갈 수 없었대. 빈거 준다.
+	if (Datas[static_cast<size_t>(_End)].Parent == InvalidNode)
+	{
+		return {};
+	}
+
+	std::vector<NodeID> Result = {};
+
+	// 부모 역추적
+	while (_End != _Start)
+	{
+		Result.push_back(_End);
+		_End = Datas[static_cast<size_t>(_End)].Parent;
+	}
+
+	// 뒤집어서 준다. (역순이므로)
+	std::reverse(Result.begin(), Result.end());
+	return Result;
 }
