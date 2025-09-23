@@ -43,7 +43,7 @@ struct UseGraphHeuristic {};
 template <GraphAPI G>
 struct ZeroHeuristic
 {
-	static constexpr typename G::Cost operator()(const G&, typename G::NodeID, typename G::NodeID) const noexcept
+	constexpr typename G::Cost operator()(const G&, typename G::NodeID, typename G::NodeID) const noexcept
 	{
 		return static_cast<typename G::Cost>(0);
 	}
@@ -79,7 +79,7 @@ struct HeuristicInvoke
 	requires HeuristicAPI<G, H>
 	static constexpr typename G::Cost Invoke(H _Heuristic, const G& _Graph, typename G::NodeID _Start, typename G::NodeID _End)
 	{
-		if constexpr (std::invocable<const H&, const G&, typename G::NodeID, typename G::NodeID)
+		if constexpr (std::invocable<const H&, const G&, typename G::NodeID, typename G::NodeID>)
 		{
 			return static_cast<typename G::Cost>(_Heuristic(_Graph, _Start, _End));
 		}
@@ -108,16 +108,17 @@ std::vector<typename Graph::NodeID> AStar(const Graph& _Graph, typename Graph::N
 		return {};
 	}
 
-	const size_t NodeCount = _Graph.GetNodeCount();
-	constexpr Cost InfCost = std::numeric_limits<Cost>::max();
-	constexpr NodeID InvalidNode = std::numeric_limits<NodeID>::max();
-
 	struct Data
 	{
 	public:
-		Cost F = InfCost;
-		Cost G = InfCost;
-		NodeID Parent = InvalidNode;
+		static constexpr NodeID InvalidNode() noexcept
+		{
+			return std::numeric_limits<NodeID>::max();
+		}
+
+		Cost F = std::numeric_limits<Cost>::max();
+		Cost G = std::numeric_limits<Cost>::max();
+		NodeID Parent = InvalidNode();
 		bool Close = false;
 	};
 
@@ -172,7 +173,7 @@ std::vector<typename Graph::NodeID> AStar(const Graph& _Graph, typename Graph::N
 	}
 
 	// 갈 수 없었대. 빈거 준다.
-	if (Datas[static_cast<size_t>(_End)].Parent == InvalidNode)
+	if (Datas[static_cast<size_t>(_End)].Parent == Data::InvalidNode())
 	{
 		return {};
 	}

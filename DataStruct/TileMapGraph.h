@@ -38,7 +38,7 @@ public:
 		if constexpr (Diagonal)
 		{
 			static constexpr Grid2D DDir[4] = { {1, 1}, {-1, -1}, {-1, 1}, {1, -1} };
-			static constexpr Cost DiaMul = static_cast<Cost>(std::sqrt(2.0));
+			static const Cost DiaMul = static_cast<Cost>(std::sqrt(2.0));
 
 			for (size_t i = 0; i < 4; ++i)
 			{
@@ -127,8 +127,8 @@ public:
 		}
 		else
 		{
-			Cost Max = Dist.x < Dist.y ? Dist.y : Dist.x;
-			Cost Min = Dist.y < Dist.x ? Dist.y : Dist.x;
+			Cost Max = Dist.x < Dist.y ? static_cast<Cost>(Dist.y) : static_cast<Cost>(Dist.x);
+			Cost Min = Dist.y < Dist.x ? static_cast<Cost>(Dist.y) : static_cast<Cost>(Dist.x);
 
 			return static_cast<Cost>(Min * BaseCost * static_cast<Cost>(std::sqrt(2.0)) + (Max - Min) * BaseCost);
 		}
