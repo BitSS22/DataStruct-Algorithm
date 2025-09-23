@@ -101,16 +101,20 @@ std::vector<typename Graph::NodeID> AStar(const Graph& _Graph, typename Graph::N
 	using Cost = typename Graph::Cost;
 	using FNPair = std::pair<Cost, NodeID>;
 
+	// 유효성 검사.
 	assert(_Graph.IsValid(_Start) && _Graph.IsValid(_End));
 
+	// 시작과 도착이 같은 곳이면, 그냥 빈 컨테이너 준다.
 	if (_Start == _End)
 	{
 		return {};
 	}
 
+	// 관리하기 쉽게 구조체로 묶겠다.
 	struct Data
 	{
 	public:
+		// 로컬 구조체에서 static이 안되므로, static constexpr로 컴파일 타임에 가져올수 있게 함수로 만든다.
 		static constexpr NodeID InvalidNode() noexcept
 		{
 			return std::numeric_limits<NodeID>::max();
