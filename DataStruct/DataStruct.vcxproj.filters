@@ -53,9 +53,15 @@
     <ClInclude Include="AStar.h">
       <Filter>Algorithm\Graph\GraphAlgorithm</Filter>
     </ClInclude>
+    <ClInclude Include="trie.h">
+      <Filter>DataStruct</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="trie.cpp">
+      <Filter>DataStruct</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="DataStruct">
