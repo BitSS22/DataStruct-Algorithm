@@ -152,6 +152,7 @@
     <ClInclude Include="unordered_map.h" />
     <ClInclude Include="Utility.h" />
     <ClInclude Include="vector.h" />
+    <ClInclude Include="GenerationalObjectPool.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
