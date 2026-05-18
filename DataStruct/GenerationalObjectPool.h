@@ -2,6 +2,9 @@
 
 #include <memory>
 #include <cassert>
+#include <cstring>
+#include <new>
+#include <utility>
 
 // 구조 정리를 좀 하고 시작하자
 //
@@ -95,22 +98,7 @@ public:
 	GenerationalObjectPool() {}
 	~GenerationalObjectPool()
 	{
-		Clear();
-
-		for (size_t i = 0; i < chunk_used; ++i)
-		{
-			if (slots[i] != nullptr)
-			{
-				::operator delete(slots[i]);
-				slots[i] = nullptr;
-			}
-		}
-
-		if (slots != nullptr)
-		{
-			::operator delete(slots);
-			slots = nullptr;
-		}
+		Release();
 	}
 
 	GenerationalObjectPool(const GenerationalObjectPool& other) = delete;
@@ -129,7 +117,6 @@ public:
 		total_capacity = other.total_capacity;
 
 		other.slots = nullptr;
-		other.iteration_start_index = 0;
 		other.next_index = 0;
 		other.chunk_used = 0;
 		other.chunk_capacity = 0;
@@ -146,6 +133,11 @@ public:
 			return *this;
 		}
 
+		if (slots != nullptr)
+		{
+			Release();
+		}
+
 		slots = other.slots;
 		next_index = other.next_index;
 		chunk_used = other.chunk_used;
@@ -154,7 +146,6 @@ public:
 		total_capacity = other.total_capacity;
 
 		other.slots = nullptr;
-		other.iteration_start_index = 0;
 		other.next_index = 0;
 		other.chunk_used = 0;
 		other.chunk_capacity = 0;
@@ -314,10 +305,12 @@ private:
 			ResizeChunkCapacity(capacity);
 		}
 
-		slots[chunk_used] = static_cast<Slot*>(::operator new(sizeof(Slot) * chunk_in_slot_count));
+		slots[chunk_used] = static_cast<Slot*>(::operator new(sizeof(Slot) * chunk_in_slot_count, std::align_val_t(alignof(Slot))));
 
 		for (size_t i = 0; i < chunk_in_slot_count; ++i)
 		{
+			std::construct_at(&slots[chunk_used][i]);
+
 			slots[chunk_used][i].generation = 0;
 			slots[chunk_used][i].next_index = chunk_used * chunk_in_slot_count + i + 1;
 			slots[chunk_used][i].isAlive = false;
@@ -344,5 +337,33 @@ private:
 		}
 
 		return true;
+	}
+
+	void Release()
+	{
+		Clear();
+
+		for (size_t i = 0; i < chunk_used; ++i)
+		{
+			for (size_t j = 0; j < chunk_in_slot_count; ++j)
+			{
+				std::destroy_at(&slots[i][j]);
+			}
+
+			::operator delete(slots[i], std::align_val_t(alignof(Slot)));
+			slots[i] = nullptr;
+		}
+
+		if (slots != nullptr)
+		{
+			::operator delete(slots);
+			slots = nullptr;
+		}
+
+		next_index = 0;
+		chunk_used = 0;
+		chunk_capacity = 0;
+		total_size = 0;
+		total_capacity = 0;
 	}
 };
